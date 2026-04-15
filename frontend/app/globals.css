@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --void: #07070f;
+  --cream: #f2ede4;
+  --gold: #c9a45a;
+  --muted: #6b6f88;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: var(--void);
+  color: var(--cream);
+  font-family: 'Georgia', 'Cambria', 'Times New Roman', serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(201, 164, 90, 0.25);
+  color: var(--cream);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 164, 90, 0.3);
+  border-radius: 2px;
+}
+
+/* Input resets */
+input, select, textarea {
+  font-family: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--cream);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(0.3) hue-rotate(180deg);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+/* Utility classes */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #e8d5a3, #c9a45a, #e8d5a3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-surface {
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+}
+
+.card-surface-glow {
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid rgba(201, 164, 90, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(201, 164, 90, 0.06), inset 0 0 30px rgba(201, 164, 90, 0.03);
+}
+
+.blur-overlay {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(7, 7, 15, 0.75);
+}
