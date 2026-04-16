@@ -1,0 +1,73 @@
+/* ─────────────────────────────────────────────
+   Naksha Design Tokens — Single source of truth.
+   Change here → changes everywhere.
+   ───────────────────────────────────────────── */
+
+:root {
+  /* ── Palette ── */
+  --clr-bg:           #5a6a78;          /* steel blue */
+  --clr-bg-raised:    rgba(255,255,255,0.07);
+  --clr-bg-deep:      #3a4e5c;          /* dark panel — modals, dropdowns */
+  --clr-bg-overlay:   rgba(52,66,76,0.88);
+
+  --clr-text:         #ffffff;
+  --clr-text-2:       rgba(255,255,255,0.58);
+  --clr-text-3:       rgba(255,255,255,0.32);
+
+  --clr-accent:       #d4b896;          /* warm gold */
+  --clr-accent-dim:   rgba(212,184,150,0.12);
+  --clr-accent-line:  rgba(212,184,150,0.3);
+
+  --clr-border:       rgba(255,255,255,0.14);
+  --clr-border-2:     rgba(255,255,255,0.07);
+
+  /* ── Typography ── */
+  /* --font-display is injected by layout.tsx via next/font (Cormorant Garamond — readings prose) */
+  /* --font-sans    is injected by layout.tsx via next/font (Nunito Sans — UI shell)              */
+  --font-label: var(--font-sans, "Nunito Sans", system-ui, sans-serif);
+
+  --text-display: clamp(56px, 8vw, 88px);
+  --text-h1:      clamp(36px, 4vw, 48px);
+  --text-h2:      clamp(24px, 3vw, 32px);
+  --text-h3:      1.375rem;
+  --text-body:    1.0625rem;   /* 17px */
+  --text-sm:      0.9375rem;   /* 15px */
+  --text-xs:      0.8125rem;   /* 13px */
+  --text-label:   0.6875rem;   /* 11px */
+
+  --leading-tight:  1.15;
+  --leading-normal: 1.75;
+  --leading-loose:  2.0;
+
+  --tracking-wide:  0.10em;
+  --tracking-wider: 0.20em;
+  --tracking-caps:  0.22em;
+
+  /* ── Spacing ── */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+
+  /* ── Borders & Radii ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* ── Motion ── */
+  --ease:          cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:      cubic-bezier(0, 0, 0.2, 1);
+  --dur-fast:      150ms;
+  --dur-normal:    320ms;
+  --dur-slow:      700ms;
+  --dur-page:      1000ms;
+}

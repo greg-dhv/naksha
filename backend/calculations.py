@@ -17,7 +17,6 @@ NAKSHATRAS = [
     'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'
 ]
 
-# Each nakshatra is ruled by a planet in this order, cycling through 27
 NAKSHATRA_LORDS = [
     'Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu',
     'Jupiter', 'Saturn', 'Mercury', 'Ketu', 'Venus', 'Sun',
@@ -33,7 +32,7 @@ DASHA_YEARS = {
 }
 TOTAL_DASHA_YEARS = 120
 
-NAK_SIZE = 360.0 / 27.0  # ~13.333°
+NAK_SIZE = 360.0 / 27.0
 
 PLANET_IDS = {
     'Sun': swe.SUN,
@@ -45,6 +44,60 @@ PLANET_IDS = {
     'Saturn': swe.SATURN,
     'Rahu': swe.MEAN_NODE,
 }
+
+# Navamsa (D-9) starting sign index by birth sign's element
+NAVAMSA_START = {
+    0: 0, 4: 0, 8: 0,    # Fire  → Aries
+    1: 9, 5: 9, 9: 9,    # Earth → Capricorn
+    2: 6, 6: 6, 10: 6,   # Air   → Libra
+    3: 3, 7: 3, 11: 3,   # Water → Cancer
+}
+
+# Dignity tables
+EXALTATION_SIGN = {
+    'Sun': 0, 'Moon': 1, 'Mercury': 5, 'Venus': 11,
+    'Mars': 9, 'Jupiter': 3, 'Saturn': 6, 'Rahu': 1, 'Ketu': 7
+}
+DEBILITATION_SIGN = {p: (s + 6) % 12 for p, s in EXALTATION_SIGN.items()}
+OWN_SIGNS = {
+    'Sun': [4], 'Moon': [3], 'Mercury': [2, 5], 'Venus': [1, 6],
+    'Mars': [0, 7], 'Jupiter': [8, 11], 'Saturn': [9, 10],
+    'Rahu': [], 'Ketu': []
+}
+# (sign_index, from_degree, to_degree)
+MOOLATRIKONA = {
+    'Sun': (4, 0, 20), 'Moon': (1, 4, 20), 'Mercury': (5, 16, 20),
+    'Venus': (6, 0, 15), 'Mars': (0, 0, 12), 'Jupiter': (8, 0, 10),
+    'Saturn': (10, 0, 20),
+}
+
+# Combustion orbs in degrees (using direct orbs; retrograde planets slightly tighter but kept simple)
+COMBUST_ORBS = {
+    'Moon': 12, 'Mercury': 14, 'Venus': 10,
+    'Mars': 17, 'Jupiter': 11, 'Saturn': 15,
+}
+
+# Panchanga tables
+TITHIS = [
+    'Shukla Pratipada', 'Shukla Dwitiya', 'Shukla Tritiya', 'Shukla Chaturthi',
+    'Shukla Panchami', 'Shukla Shashthi', 'Shukla Saptami', 'Shukla Ashtami',
+    'Shukla Navami', 'Shukla Dashami', 'Shukla Ekadashi', 'Shukla Dwadashi',
+    'Shukla Trayodashi', 'Shukla Chaturdashi', 'Purnima',
+    'Krishna Pratipada', 'Krishna Dwitiya', 'Krishna Tritiya', 'Krishna Chaturthi',
+    'Krishna Panchami', 'Krishna Shashthi', 'Krishna Saptami', 'Krishna Ashtami',
+    'Krishna Navami', 'Krishna Dashami', 'Krishna Ekadashi', 'Krishna Dwadashi',
+    'Krishna Trayodashi', 'Krishna Chaturdashi', 'Amavasya'
+]
+VARAS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+YOGA_NAMES_LIST = [
+    'Vishkambha', 'Priti', 'Ayushman', 'Saubhagya', 'Shobhana', 'Atiganda',
+    'Sukarma', 'Dhriti', 'Shula', 'Ganda', 'Vriddhi', 'Dhruva', 'Vyaghata',
+    'Harshana', 'Vajra', 'Siddhi', 'Vyatipata', 'Variyan', 'Parigha', 'Shiva',
+    'Siddha', 'Sadhya', 'Shubha', 'Shukla', 'Brahma', 'Indra', 'Vaidhriti'
+]
+# 60 karanas: index 0 = Kimstughna (fixed), 1-56 = 7 repeating × 8, 57-59 = 3 fixed
+_REPEATING_KARANAS = ['Bava', 'Balava', 'Kaulava', 'Taitula', 'Garaja', 'Vanija', 'Vishti']
+KARANA_NAMES = ['Kimstughna'] + _REPEATING_KARANAS * 8 + ['Shakuni', 'Chatushpada', 'Naga']
 
 _tf = TimezoneFinder()
 
@@ -62,149 +115,367 @@ def _lon_to_info(longitude: float) -> dict:
         'longitude': round(lon, 6),
         'nakshatra': NAKSHATRAS[nak_index],
         'nakshatra_index': nak_index,
+        'nakshatra_lord': NAKSHATRA_LORDS[nak_index],
         'pada': pada,
     }
+
+
+def _navamsa_sign_index(longitude: float) -> int:
+    lon = longitude % 360
+    sign_index = int(lon / 30)
+    navamsa_offset = int((lon % 30) / (30.0 / 9))
+    return (NAVAMSA_START[sign_index] + navamsa_offset) % 12
+
+
+def _dasamsa_sign_index(longitude: float) -> int:
+    lon = longitude % 360
+    sign_index = int(lon / 30)
+    dasamsa_offset = int((lon % 30) / 3)
+    # Odd signs (0-indexed even): start from same sign; even signs: start from 9th
+    start = sign_index if sign_index % 2 == 0 else (sign_index + 8) % 12
+    return (start + dasamsa_offset) % 12
+
+
+def _get_dignity(planet_name: str, sign_index: int, degree: float) -> str:
+    if sign_index == EXALTATION_SIGN.get(planet_name):
+        return 'exalted'
+    if sign_index == DEBILITATION_SIGN.get(planet_name):
+        return 'debilitated'
+    if planet_name in MOOLATRIKONA:
+        mt_sign, mt_from, mt_to = MOOLATRIKONA[planet_name]
+        if sign_index == mt_sign and mt_from <= degree <= mt_to:
+            return 'moolatrikona'
+    if sign_index in OWN_SIGNS.get(planet_name, []):
+        return 'own'
+    return 'neutral'
 
 
 def _birth_jd(birth_date: date, birth_time: str, lat: float, lon: float) -> float:
     """Convert local birth time to Julian Day (UT)."""
     hour, minute = map(int, birth_time.split(':'))
-
     tz_name = _tf.timezone_at(lat=lat, lng=lon) or 'UTC'
     tz = pytz.timezone(tz_name)
     local_dt = datetime(birth_date.year, birth_date.month, birth_date.day, hour, minute)
     local_dt = tz.localize(local_dt)
     utc_dt = local_dt.utctimetuple()
-
     hour_ut = utc_dt.tm_hour + utc_dt.tm_min / 60.0
     return swe.julday(utc_dt.tm_year, utc_dt.tm_mon, utc_dt.tm_mday, hour_ut)
 
 
-def calculate_chart(
-    birth_date: date,
-    birth_time: str,
-    lat: float,
-    lon: float,
-) -> dict:
+def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
+    yogas = []
+    KENDRAS = {1, 4, 7, 10}
+
+    # Pancha Mahapurusha Yogas: functional graha in own/exalt/moolatrikona in kendra
+    MAHA = {
+        'Mars': ('Ruchaka', 'Pancha Mahapurusha'),
+        'Mercury': ('Bhadra', 'Pancha Mahapurusha'),
+        'Jupiter': ('Hamsa', 'Pancha Mahapurusha'),
+        'Venus': ('Malavya', 'Pancha Mahapurusha'),
+        'Saturn': ('Shasha', 'Pancha Mahapurusha'),
+    }
+    for planet, (yoga_name, yoga_type) in MAHA.items():
+        p = planets.get(planet)
+        if not p:
+            continue
+        h = p['house']
+        dignity = p.get('dignity', '')
+        if h in KENDRAS and dignity in ('exalted', 'own', 'moolatrikona'):
+            yogas.append({
+                'name': yoga_name,
+                'type': yoga_type,
+                'planets': [planet],
+                'houses': [h],
+                'description': f'{planet} {dignity} in kendra (house {h})',
+            })
+
+    moon = planets.get('Moon')
+    jupiter = planets.get('Jupiter')
+    sun = planets.get('Sun')
+    mercury = planets.get('Mercury')
+    mars = planets.get('Mars')
+
+    # Gajakesari: Jupiter in kendra from Moon
+    if moon and jupiter:
+        jup_from_moon = (jupiter['sign_index'] - moon['sign_index']) % 12 + 1
+        if jup_from_moon in KENDRAS:
+            yogas.append({
+                'name': 'Gajakesari',
+                'type': 'Benefic',
+                'planets': ['Jupiter', 'Moon'],
+                'houses': [moon['house'], jupiter['house']],
+                'description': f'Jupiter in house {jup_from_moon} from Moon',
+            })
+
+    # Budha-Aditya: Sun and Mercury conjunct
+    if sun and mercury and sun['house'] == mercury['house']:
+        yogas.append({
+            'name': 'Budha-Aditya',
+            'type': 'Intelligence',
+            'planets': ['Sun', 'Mercury'],
+            'houses': [sun['house']],
+            'description': f'Sun and Mercury conjunct in house {sun["house"]}',
+        })
+
+    # Chandra-Mangala: Moon and Mars conjunct
+    if moon and mars and moon['house'] == mars['house']:
+        yogas.append({
+            'name': 'Chandra-Mangala',
+            'type': 'Wealth',
+            'planets': ['Moon', 'Mars'],
+            'houses': [moon['house']],
+            'description': f'Moon and Mars conjunct in house {moon["house"]}',
+        })
+
+    # Kemadruma: no graha in 2nd or 12th from Moon (Sun, Rahu, Ketu excluded)
+    if moon:
+        moon_si = moon['sign_index']
+        adj = {(moon_si + 1) % 12, (moon_si - 1) % 12}
+        adjacent = [
+            n for n, p in planets.items()
+            if n not in ('Moon', 'Sun', 'Rahu', 'Ketu') and p['sign_index'] in adj
+        ]
+        if not adjacent:
+            yogas.append({
+                'name': 'Kemadruma',
+                'type': 'Affliction',
+                'planets': ['Moon'],
+                'houses': [moon['house']],
+                'description': 'No planets in 2nd or 12th from Moon',
+            })
+
+    # Vesi / Vasi: planets in 2nd / 12th from Sun
+    if sun:
+        sun_si = sun['sign_index']
+        excluded = ('Sun', 'Moon', 'Rahu', 'Ketu')
+        vesi = [n for n, p in planets.items() if n not in excluded and p['sign_index'] == (sun_si + 1) % 12]
+        vasi = [n for n, p in planets.items() if n not in excluded and p['sign_index'] == (sun_si - 1) % 12]
+        if vesi:
+            yogas.append({
+                'name': 'Vesi',
+                'type': 'Sun Yoga',
+                'planets': ['Sun'] + vesi,
+                'houses': [sun['house']] + [planets[n]['house'] for n in vesi],
+                'description': f'{", ".join(vesi)} in 2nd from Sun',
+            })
+        if vasi:
+            yogas.append({
+                'name': 'Vasi',
+                'type': 'Sun Yoga',
+                'planets': ['Sun'] + vasi,
+                'houses': [sun['house']] + [planets[n]['house'] for n in vasi],
+                'description': f'{", ".join(vasi)} in 12th from Sun',
+            })
+
+    return yogas
+
+
+def _calculate_panchanga(jd: float, sun_lon: float, moon_lon: float) -> dict:
+    elongation = (moon_lon - sun_lon) % 360
+
+    # Tithi: each tithi = 12° of elongation
+    tithi_index = int(elongation / 12)  # 0–29
+
+    # Vara: convert JD to Vedic weekday (0=Sun … 6=Sat)
+    y, mo, d, _ = swe.revjul(jd)
+    dt = date(y, mo, int(d))
+    python_wd = dt.weekday()          # 0=Mon … 6=Sun
+    vedic_vara = (python_wd + 1) % 7  # 0=Sun, 1=Mon … 6=Sat
+
+    # Yoga: (Sun + Moon) / (360/27)
+    yoga_index = int(((sun_lon + moon_lon) % 360) / (360.0 / 27))  # 0–26
+
+    # Karana: each karana = 6° of elongation
+    karana_index = int(elongation / 6) % 60  # 0–59
+
+    return {
+        'tithi': TITHIS[tithi_index],
+        'tithi_index': tithi_index + 1,
+        'vara': VARAS[vedic_vara],
+        'yoga': YOGA_NAMES_LIST[yoga_index],
+        'yoga_index': yoga_index + 1,
+        'karana': KARANA_NAMES[karana_index],
+        'karana_index': karana_index + 1,
+    }
+
+
+def calculate_chart(birth_date: date, birth_time: str, lat: float, lon: float) -> dict:
     swe.set_sid_mode(swe.SIDM_LAHIRI)
     flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
 
     jd = _birth_jd(birth_date, birth_time, lat, lon)
+    ayanamsa = swe.get_ayanamsa_ut(jd)
 
-    # Ascendant — Whole Sign houses ('W')
-    try:
-        cusps, ascmc = swe.houses_ex(jd, lat, lon, b'W', flags)
-    except Exception:
-        # Fallback: use Placidus and extract ascendant only
-        cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
-
-    lagna_lon = ascmc[0] % 360
+    # Ascendant: compute tropical then subtract ayanamsa
+    cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P')
+    lagna_lon = (ascmc[0] - ayanamsa) % 360
     lagna_info = _lon_to_info(lagna_lon)
     lagna_sign_index = lagna_info['sign_index']
 
     # Planets
-    planets = {}
+    planets: dict = {}
+    raw_lons: dict = {}
     for planet_name, planet_id in PLANET_IDS.items():
         result, _ = swe.calc_ut(jd, planet_id, flags)
         p_lon = result[0] % 360
-        speed = result[3]
-
+        raw_lons[planet_name] = p_lon
         info = _lon_to_info(p_lon)
         info['name'] = planet_name
         info['house'] = (info['sign_index'] - lagna_sign_index) % 12 + 1
-        info['is_retrograde'] = bool(speed < 0)
+        info['is_retrograde'] = bool(result[3] < 0)
         planets[planet_name] = info
 
     # Ketu = Rahu + 180°
-    ketu_lon = (planets['Rahu']['longitude'] + 180) % 360
+    ketu_lon = (raw_lons['Rahu'] + 180) % 360
+    raw_lons['Ketu'] = ketu_lon
     ketu_info = _lon_to_info(ketu_lon)
     ketu_info['name'] = 'Ketu'
     ketu_info['house'] = (ketu_info['sign_index'] - lagna_sign_index) % 12 + 1
     ketu_info['is_retrograde'] = False
     planets['Ketu'] = ketu_info
 
-    return {'lagna': lagna_info, 'planets': planets}
+    # Combust + dignity (requires Sun longitude already computed)
+    sun_lon = raw_lons['Sun']
+    for planet_name, p in planets.items():
+        p['dignity'] = _get_dignity(planet_name, p['sign_index'], p['degree'])
+        if planet_name in ('Sun', 'Rahu', 'Ketu'):
+            p['combust'] = False
+        else:
+            orb = COMBUST_ORBS.get(planet_name, 15)
+            dist = abs((raw_lons[planet_name] - sun_lon + 180) % 360 - 180)
+            p['combust'] = bool(dist <= orb)
+
+    # D-9 Navamsa
+    lagna_nav_si = _navamsa_sign_index(lagna_lon)
+    navamsa: dict = {
+        'Lagna': {'sign': SIGNS[lagna_nav_si], 'sign_index': lagna_nav_si, 'house': 1}
+    }
+    for planet_name, p_lon in raw_lons.items():
+        nav_si = _navamsa_sign_index(p_lon)
+        navamsa[planet_name] = {
+            'sign': SIGNS[nav_si],
+            'sign_index': nav_si,
+            'house': (nav_si - lagna_nav_si) % 12 + 1,
+        }
+
+    # D-10 Dasamsa
+    lagna_das_si = _dasamsa_sign_index(lagna_lon)
+    dasamsa: dict = {
+        'Lagna': {'sign': SIGNS[lagna_das_si], 'sign_index': lagna_das_si, 'house': 1}
+    }
+    for planet_name, p_lon in raw_lons.items():
+        das_si = _dasamsa_sign_index(p_lon)
+        dasamsa[planet_name] = {
+            'sign': SIGNS[das_si],
+            'sign_index': das_si,
+            'house': (das_si - lagna_das_si) % 12 + 1,
+        }
+
+    return {
+        'lagna': lagna_info,
+        'planets': planets,
+        'navamsa': navamsa,
+        'dasamsa': dasamsa,
+        'panchanga': _calculate_panchanga(jd, planets['Sun']['longitude'], planets['Moon']['longitude']),
+        'yogas': _detect_yogas(planets, lagna_sign_index),
+        'metadata': {
+            'julian_day_ut': round(jd, 6),
+            'ayanamsa': round(ayanamsa, 6),
+            'computation_version': '1.1.0',
+            'computed_at': datetime.utcnow().isoformat() + 'Z',
+        },
+    }
+
+
+def _build_antardashas(maha_planet: str, maha_start: date, maha_actual_years: float) -> list:
+    maha_idx = DASHA_SEQUENCE.index(maha_planet)
+    antardashas = []
+    antar_start = maha_start
+    for i in range(9):
+        ap = DASHA_SEQUENCE[(maha_idx + i) % 9]
+        antar_years = (maha_actual_years * DASHA_YEARS[ap]) / TOTAL_DASHA_YEARS
+        antar_end = _add_years(antar_start, antar_years)
+        antar_idx = DASHA_SEQUENCE.index(ap)
+        pratyantar = []
+        pt_start = antar_start
+        for j in range(9):
+            pp = DASHA_SEQUENCE[(antar_idx + j) % 9]
+            pt_years = (antar_years * DASHA_YEARS[pp]) / TOTAL_DASHA_YEARS
+            pt_end = _add_years(pt_start, pt_years)
+            pratyantar.append({
+                'planet': pp,
+                'start_date': pt_start.isoformat(),
+                'end_date': pt_end.isoformat(),
+            })
+            pt_start = pt_end
+        antardashas.append({
+            'planet': ap,
+            'start_date': antar_start.isoformat(),
+            'end_date': antar_end.isoformat(),
+            'pratyantardashas': pratyantar,
+        })
+        antar_start = antar_end
+    return antardashas
 
 
 def calculate_dasha(birth_date: date, moon_longitude: float) -> dict:
     moon_lon = moon_longitude % 360
     nak_index = int(moon_lon / NAK_SIZE)
     nak_lord = NAKSHATRA_LORDS[nak_index]
-
-    # Fraction of current nakshatra elapsed
-    nak_start = nak_index * NAK_SIZE
-    fraction_elapsed = (moon_lon - nak_start) / NAK_SIZE
-    fraction_remaining = 1.0 - fraction_elapsed
-
-    start_dasha_idx = DASHA_SEQUENCE.index(nak_lord)
-    first_dasha_years = DASHA_YEARS[nak_lord] * fraction_remaining
+    fraction_remaining = 1.0 - (moon_lon - nak_index * NAK_SIZE) / NAK_SIZE
+    first_years = DASHA_YEARS[nak_lord] * fraction_remaining
 
     mahadashas = []
     current = birth_date
 
-    # First (partial) dasha
-    end = _add_years(current, first_dasha_years)
+    end = _add_years(current, first_years)
     mahadashas.append({
         'planet': nak_lord,
         'start_date': current.isoformat(),
         'end_date': end.isoformat(),
-        'years': round(first_dasha_years, 4),
+        'years': round(first_years, 4),
+        'antardashas': _build_antardashas(nak_lord, current, first_years),
     })
     current = end
 
-    # Subsequent full dashas — build enough to cover ~200 years from birth
-    idx = (start_dasha_idx + 1) % 9
+    idx = (DASHA_SEQUENCE.index(nak_lord) + 1) % 9
     while (current - birth_date).days < 200 * 365:
         planet = DASHA_SEQUENCE[idx]
-        years = DASHA_YEARS[planet]
+        years = float(DASHA_YEARS[planet])
         end = _add_years(current, years)
         mahadashas.append({
             'planet': planet,
             'start_date': current.isoformat(),
             'end_date': end.isoformat(),
-            'years': float(years),
+            'years': years,
+            'antardashas': _build_antardashas(planet, current, years),
         })
         current = end
         idx = (idx + 1) % 9
 
-    # Find current mahadasha
     today = date.today()
-    current_maha = None
+    current_maha = current_antar = current_pratyantar = None
+
     for m in mahadashas:
         if date.fromisoformat(m['start_date']) <= today <= date.fromisoformat(m['end_date']):
             current_maha = m
+            for a in m['antardashas']:
+                if date.fromisoformat(a['start_date']) <= today <= date.fromisoformat(a['end_date']):
+                    current_antar = a
+                    for pt in a['pratyantardashas']:
+                        if date.fromisoformat(pt['start_date']) <= today <= date.fromisoformat(pt['end_date']):
+                            current_pratyantar = pt
+                            break
+                    break
             break
-
-    # Find current antardasha
-    current_antar = None
-    if current_maha:
-        maha_start = date.fromisoformat(current_maha['start_date'])
-        maha_end = date.fromisoformat(current_maha['end_date'])
-        maha_total_years = (maha_end - maha_start).days / 365.25
-        maha_planet = current_maha['planet']
-        maha_idx = DASHA_SEQUENCE.index(maha_planet)
-
-        antar_start = maha_start
-        for i in range(9):
-            ap = DASHA_SEQUENCE[(maha_idx + i) % 9]
-            antar_years = (maha_total_years * DASHA_YEARS[ap]) / TOTAL_DASHA_YEARS
-            antar_end = _add_years(antar_start, antar_years)
-            if antar_start <= today <= antar_end:
-                current_antar = {
-                    'planet': ap,
-                    'start_date': antar_start.isoformat(),
-                    'end_date': antar_end.isoformat(),
-                }
-                break
-            antar_start = antar_end
 
     return {
         'current_mahadasha': current_maha,
         'current_antardasha': current_antar,
+        'current_pratyantardasha': current_pratyantar,
         'all_mahadashas': mahadashas[:20],
     }
 
 
 def _add_years(d: date, years: float) -> date:
-    days = int(years * 365.25)
-    return d + timedelta(days=days)
+    return d + timedelta(days=int(years * 365.25))
