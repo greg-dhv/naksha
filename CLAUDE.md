@@ -39,6 +39,18 @@ Output screen:
 
 ---
 
+## Mobile-First (Always)
+
+**90% of users will be on mobile. Every screen, every component, every layout must be designed mobile-first.**
+
+- Default layout = single column, full-width
+- Touch targets ≥ 44px
+- Bottom navigation on mobile (fixed, safe-area aware)
+- Desktop = progressive enhancement via `@media (min-width: 768px)` or inline responsive checks
+- Never design for desktop and adapt down — always design for mobile and adapt up
+
+---
+
 ## Tech Stack
 
 | Layer | Choice |

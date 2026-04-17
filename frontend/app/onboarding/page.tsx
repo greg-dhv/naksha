@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import LuminousField from '@/components/LuminousField'
 import { geocodeLocation, generateChart } from '@/lib/api'
 import { GeocodeResult } from '@/lib/types'
 
@@ -16,15 +15,52 @@ interface FormData {
   location: GeocodeResult | null
 }
 
+const S: Record<string, React.CSSProperties> = {
+  label: {
+    fontFamily: 'var(--font-label)',
+    fontSize: 'var(--text-label)',
+    letterSpacing: 'var(--tracking-caps)',
+    textTransform: 'uppercase' as const,
+    color: 'var(--clr-accent)',
+    opacity: 0.75,
+    marginBottom: '32px',
+    display: 'block',
+  },
+  question: {
+    fontFamily: 'var(--font-sans, "Nunito Sans", system-ui)',
+    fontSize: 'clamp(28px, 4vw, 40px)',
+    fontWeight: 200,
+    color: 'var(--clr-text)',
+    lineHeight: 1.2,
+    marginBottom: '12px',
+  },
+  hint: {
+    fontFamily: 'var(--font-label)',
+    fontSize: 'var(--text-xs)',
+    color: 'var(--clr-text-2)',
+    marginBottom: '40px',
+    lineHeight: 1.6,
+  },
+  input: {
+    width: '100%',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1px solid rgba(255,255,255,0.22)',
+    color: 'var(--clr-text)',
+    fontSize: 'clamp(22px, 3vw, 30px)',
+    fontFamily: 'var(--font-sans, "Nunito Sans", system-ui)',
+    fontWeight: 300,
+    padding: '8px 0 14px',
+    outline: 'none',
+    transition: 'border-color var(--dur-normal)',
+  },
+}
+
 export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('name')
   const [form, setForm] = useState<FormData>({
-    name: '',
-    birth_date: '',
-    birth_time: '',
-    birth_time_unknown: false,
-    location: null,
+    name: '', birth_date: '', birth_time: '', birth_time_unknown: false, location: null,
   })
   const [locationQuery, setLocationQuery] = useState('')
   const [locationResults, setLocationResults] = useState<GeocodeResult[]>([])
@@ -32,16 +68,12 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [visible, setVisible] = useState(false)
-
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setVisible(false)
-    const t = setTimeout(() => {
-      setVisible(true)
-      inputRef.current?.focus()
-    }, 80)
+    const t = setTimeout(() => { setVisible(true); inputRef.current?.focus() }, 80)
     return () => clearTimeout(t)
   }, [step])
 
@@ -58,11 +90,8 @@ export default function OnboardingPage() {
   const next = () => {
     if (!canProceed()) return
     const idx = STEPS.indexOf(step)
-    if (idx < STEPS.length - 1) {
-      setStep(STEPS[idx + 1])
-    } else {
-      submit()
-    }
+    if (idx < STEPS.length - 1) setStep(STEPS[idx + 1])
+    else submit()
   }
 
   const back = () => {
@@ -70,35 +99,22 @@ export default function OnboardingPage() {
     if (idx > 0) setStep(STEPS[idx - 1])
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') next()
-  }
-
   const searchLocation = (query: string) => {
     setLocationQuery(query)
-    form.location && setForm(f => ({ ...f, location: null }))
+    if (form.location) setForm(f => ({ ...f, location: null }))
     if (searchTimeout.current) clearTimeout(searchTimeout.current)
-    if (query.trim().length < 2) {
-      setLocationResults([])
-      return
-    }
+    if (query.trim().length < 2) { setLocationResults([]); setError(''); return }
     searchTimeout.current = setTimeout(async () => {
       setSearching(true)
-      try {
-        const results = await geocodeLocation(query)
-        setLocationResults(results)
-      } catch {
-        // silently ignore
-      } finally {
-        setSearching(false)
-      }
-    }, 400)
+      try { setLocationResults(await geocodeLocation(query)) }
+      catch { setLocationResults([]); setError('Location search unavailable — is the backend running?') }
+      finally { setSearching(false) }
+    }, 380)
   }
 
   const submit = async () => {
     if (!form.location) return
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     try {
       const data = await generateChart({
         name: form.name.trim(),
@@ -117,118 +133,114 @@ export default function OnboardingPage() {
     }
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid rgba(201,164,90,0.35)',
-    color: 'var(--cream)',
-    fontSize: '1.5rem',
-    padding: '8px 0 12px',
-    outline: 'none',
-    fontFamily: 'Georgia, serif',
-    transition: 'border-color 0.3s ease',
-  }
-
-  const transitionStyle: React.CSSProperties = {
-    opacity: visible ? 1 : 0,
-    transform: visible ? 'translateY(0)' : 'translateY(12px)',
-    transition: 'opacity 0.55s ease, transform 0.55s ease',
-  }
+  const writtenDate = form.birth_date
+    ? new Date(form.birth_date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-void px-6">
-      <LuminousField intensity={0.7} />
-
+    <main
+      style={{
+        minHeight: '100vh',
+        background: 'var(--clr-bg)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '80px 24px',
+        position: 'relative',
+      }}
+    >
       {/* Back */}
       {stepIndex > 0 && (
         <button
           onClick={back}
-          className="absolute top-8 left-8 text-xs tracking-widest uppercase z-10"
-          style={{ color: 'rgba(242,235,218,0.3)', letterSpacing: '0.18em' }}
+          style={{
+            position: 'absolute', top: '36px', left: '52px',
+            fontFamily: 'var(--font-label)',
+            fontSize: 'var(--text-label)',
+            letterSpacing: 'var(--tracking-caps)',
+            textTransform: 'uppercase',
+            color: 'var(--clr-text-3)',
+            background: 'none', border: 'none', cursor: 'pointer',
+            transition: 'color var(--dur-normal)',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--clr-text-2)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--clr-text-3)')}
         >
-          ← back
+          ← Back
         </button>
       )}
 
-      {/* Progress dots */}
-      <div className="absolute top-10 flex gap-2 z-10">
+      {/* Progress */}
+      <div style={{ position: 'absolute', top: '42px', display: 'flex', gap: '8px' }}>
         {STEPS.map((s, i) => (
           <div
             key={s}
-            className="rounded-full transition-all duration-500"
             style={{
-              width: i === stepIndex ? '20px' : '6px',
-              height: '6px',
-              background: i <= stepIndex ? 'rgba(201,164,90,0.7)' : 'rgba(255,255,255,0.12)',
+              height: '2px',
+              width: i === stepIndex ? '28px' : '8px',
+              background: i <= stepIndex ? 'var(--clr-accent)' : 'var(--clr-border)',
+              borderRadius: '1px',
+              opacity: i <= stepIndex ? 0.7 : 0.4,
+              transition: 'width var(--dur-normal) var(--ease), background var(--dur-normal)',
             }}
           />
         ))}
       </div>
 
-      <div className="relative z-10 w-full max-w-md" style={transitionStyle}>
-        {/* Step: Name */}
+      {/* Form */}
+      <div
+        className={visible ? 'page-visible' : 'page-enter'}
+        style={{ width: '100%', maxWidth: '480px' }}
+      >
+        {/* ── NAME ── */}
         {step === 'name' && (
           <div>
-            <p className="text-xs tracking-widest uppercase mb-8" style={{ color: 'var(--gold)', opacity: 0.7 }}>
-              Begin
-            </p>
-            <h2 className="text-3xl font-serif mb-2" style={{ color: 'var(--cream)', lineHeight: 1.4 }}>
-              How should we call you?
-            </h2>
-            <p className="text-sm mb-10" style={{ color: 'var(--muted)' }}>
-              Your name helps the reading feel personal.
-            </p>
+            <span style={S.label}>Begin</span>
+            <h2 style={S.question}>How should we call you?</h2>
+            <p style={S.hint}>Your name makes the reading feel personal.</p>
             <input
               ref={inputRef}
               type="text"
               placeholder="Your name"
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-              onKeyDown={handleKeyDown}
-              style={inputStyle}
+              onKeyDown={e => e.key === 'Enter' && next()}
+              style={S.input}
               autoComplete="given-name"
             />
           </div>
         )}
 
-        {/* Step: Date */}
+        {/* ── DATE ── */}
         {step === 'date' && (
           <div>
-            <p className="text-xs tracking-widest uppercase mb-8" style={{ color: 'var(--gold)', opacity: 0.7 }}>
-              {form.name}
-            </p>
-            <h2 className="text-3xl font-serif mb-2" style={{ color: 'var(--cream)', lineHeight: 1.4 }}>
-              When were you born?
-            </h2>
-            <p className="text-sm mb-10" style={{ color: 'var(--muted)' }}>
-              Your birth date anchors your karmic map.
-            </p>
+            <span style={S.label}>{form.name}</span>
+            <h2 style={S.question}>When were you born?</h2>
+            <p style={S.hint}>Your birth date anchors your karmic map.</p>
             <input
               ref={inputRef}
               type="date"
               value={form.birth_date}
               onChange={e => setForm(f => ({ ...f, birth_date: e.target.value }))}
-              onKeyDown={handleKeyDown}
-              style={inputStyle}
+              onKeyDown={e => e.key === 'Enter' && next()}
+              style={S.input}
               max={new Date().toISOString().split('T')[0]}
             />
+            {writtenDate && (
+              <p style={{ marginTop: '14px', fontFamily: 'var(--font-label)', fontSize: 'var(--text-sm)', color: 'var(--clr-accent)', opacity: 0.75 }}>
+                {writtenDate}
+              </p>
+            )}
           </div>
         )}
 
-        {/* Step: Time */}
+        {/* ── TIME ── */}
         {step === 'time' && (
           <div>
-            <p className="text-xs tracking-widest uppercase mb-8" style={{ color: 'var(--gold)', opacity: 0.7 }}>
-              {form.name}
-            </p>
-            <h2 className="text-3xl font-serif mb-2" style={{ color: 'var(--cream)', lineHeight: 1.4 }}>
-              What time were you born?
-            </h2>
-            <p className="text-sm mb-10" style={{ color: 'var(--muted)' }}>
-              Your rising sign depends on the hour. As precise as you know.
-            </p>
-
+            <span style={S.label}>{form.name}</span>
+            <h2 style={S.question}>What time were you born?</h2>
+            <p style={S.hint}>Your rising sign depends on the hour. As precise as you know.</p>
             {!form.birth_time_unknown ? (
               <>
                 <input
@@ -236,26 +248,33 @@ export default function OnboardingPage() {
                   type="time"
                   value={form.birth_time}
                   onChange={e => setForm(f => ({ ...f, birth_time: e.target.value }))}
-                  onKeyDown={handleKeyDown}
-                  style={inputStyle}
+                  onKeyDown={e => e.key === 'Enter' && next()}
+                  style={S.input}
                 />
                 <button
                   onClick={() => setForm(f => ({ ...f, birth_time_unknown: true, birth_time: '' }))}
-                  className="mt-6 text-xs"
-                  style={{ color: 'rgba(242,235,218,0.28)', letterSpacing: '0.08em', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                  style={{
+                    marginTop: '20px', background: 'none', border: 'none', cursor: 'pointer',
+                    fontFamily: 'var(--font-label)', fontSize: 'var(--text-label)',
+                    letterSpacing: '0.1em', color: 'var(--clr-text-3)',
+                    textDecoration: 'underline', textUnderlineOffset: '3px',
+                  }}
                 >
                   I don't know my exact birth time
                 </button>
               </>
             ) : (
-              <div className="py-4">
-                <p className="text-sm mb-4" style={{ color: 'rgba(242,235,218,0.5)', fontStyle: 'italic' }}>
-                  We'll use noon as a reference. Your house placements may be approximate, but your planets and life season will be accurate.
+              <div>
+                <p style={{ ...S.hint, fontStyle: 'italic', marginBottom: '16px' }}>
+                  We'll use noon as a reference. Planets and life season will be accurate; house positions approximate.
                 </p>
                 <button
                   onClick={() => setForm(f => ({ ...f, birth_time_unknown: false }))}
-                  className="text-xs"
-                  style={{ color: 'var(--gold)', opacity: 0.7, letterSpacing: '0.08em' }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontFamily: 'var(--font-label)', fontSize: 'var(--text-label)',
+                    letterSpacing: '0.12em', color: 'var(--clr-accent)', opacity: 0.7,
+                  }}
                 >
                   I do know my birth time →
                 </button>
@@ -264,66 +283,52 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step: Location */}
+        {/* ── LOCATION ── */}
         {step === 'location' && (
           <div>
-            <p className="text-xs tracking-widest uppercase mb-8" style={{ color: 'var(--gold)', opacity: 0.7 }}>
-              {form.name}
-            </p>
-            <h2 className="text-3xl font-serif mb-2" style={{ color: 'var(--cream)', lineHeight: 1.4 }}>
-              Where were you born?
-            </h2>
-            <p className="text-sm mb-10" style={{ color: 'var(--muted)' }}>
-              City and country is enough.
-            </p>
-
-            <div className="relative">
+            <span style={S.label}>{form.name}</span>
+            <h2 style={S.question}>Where were you born?</h2>
+            <p style={S.hint}>City and country is enough.</p>
+            <div style={{ position: 'relative' }}>
               <input
                 ref={inputRef}
                 type="text"
                 placeholder="Search a city…"
                 value={form.location ? form.location.short_name : locationQuery}
                 onChange={e => searchLocation(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && form.location) next()
-                }}
-                style={{
-                  ...inputStyle,
-                  color: form.location ? 'var(--gold)' : 'var(--cream)',
-                }}
+                onKeyDown={e => { if (e.key === 'Enter' && form.location) next() }}
+                style={{ ...S.input, color: form.location ? 'var(--clr-accent)' : 'var(--clr-text)' }}
                 autoComplete="off"
               />
-
               {searching && (
-                <div className="absolute right-0 bottom-3 text-xs" style={{ color: 'var(--muted)' }}>
+                <span style={{ position: 'absolute', right: 0, bottom: '14px', fontFamily: 'var(--font-label)', fontSize: '10px', color: 'var(--clr-text-3)', letterSpacing: '0.12em' }}>
                   searching…
-                </div>
+                </span>
               )}
-
               {locationResults.length > 0 && !form.location && (
-                <div
-                  className="absolute top-full mt-2 w-full z-20 py-1"
-                  style={{
-                    background: 'rgba(12,12,24,0.97)',
-                    border: '1px solid rgba(201,164,90,0.2)',
-                    borderRadius: '8px',
-                  }}
-                >
+                <div style={{
+                  position: 'absolute', top: '100%', marginTop: '4px', width: '100%', zIndex: 20,
+                  background: '#3a4e5c', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 'var(--radius-md)',
+                  overflow: 'hidden',
+                }}>
                   {locationResults.map((r, i) => (
                     <button
                       key={i}
-                      onClick={() => {
-                        setForm(f => ({ ...f, location: r }))
-                        setLocationResults([])
-                        setLocationQuery(r.short_name)
+                      onClick={() => { setForm(f => ({ ...f, location: r })); setLocationResults([]); setLocationQuery(r.short_name) }}
+                      style={{
+                        width: '100%', textAlign: 'left', padding: '14px 18px', background: 'none',
+                        border: 'none', borderBottom: i < locationResults.length - 1 ? '1px solid var(--clr-border-2)' : 'none',
+                        cursor: 'pointer', transition: 'background var(--dur-fast)',
                       }}
-                      className="w-full text-left px-4 py-3 text-sm transition-colors"
-                      style={{ color: 'var(--cream)', borderBottom: i < locationResults.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(201,164,90,0.06)' }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(200,170,110,0.05)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                     >
-                      <span style={{ fontWeight: 500 }}>{r.short_name}</span>
-                      <span className="block text-xs mt-0.5" style={{ color: 'var(--muted)' }}>{r.display_name}</span>
+                      <span style={{ fontFamily: 'var(--font-label)', fontWeight: 400, fontSize: 'var(--text-sm)', color: 'var(--clr-text)', display: 'block' }}>
+                        {r.short_name}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-label)', fontSize: '11px', color: 'var(--clr-text-3)', display: 'block', marginTop: '2px' }}>
+                        {r.display_name}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -334,55 +339,34 @@ export default function OnboardingPage() {
 
         {/* Error */}
         {error && (
-          <p className="mt-4 text-sm" style={{ color: '#e85c4a', opacity: 0.85 }}>
+          <p style={{ marginTop: '16px', fontFamily: 'var(--font-label)', fontSize: 'var(--text-xs)', color: '#e06a6a' }}>
             {error}
           </p>
         )}
 
-        {/* Next / Submit */}
-        <div className="mt-14 flex items-center justify-between">
+        {/* Continue */}
+        <div style={{ marginTop: '52px' }}>
           <button
             onClick={next}
             disabled={!canProceed() || loading}
-            className="inline-flex items-center gap-3 text-sm tracking-widest uppercase transition-all duration-300"
             style={{
-              color: canProceed() && !loading ? 'var(--cream)' : 'rgba(242,235,218,0.2)',
-              letterSpacing: '0.2em',
-              cursor: canProceed() && !loading ? 'pointer' : 'not-allowed',
+              background: 'none', border: 'none', cursor: canProceed() && !loading ? 'pointer' : 'not-allowed',
+              fontFamily: 'var(--font-label)', fontSize: 'var(--text-label)',
+              letterSpacing: 'var(--tracking-caps)', textTransform: 'uppercase',
+              color: canProceed() && !loading ? 'var(--clr-text)' : 'var(--clr-text-3)',
+              transition: 'color var(--dur-normal)',
+              display: 'flex', alignItems: 'center', gap: '10px',
             }}
           >
             {loading ? (
               <>
-                <span style={{ color: 'var(--gold)' }}>Mapping your chart</span>
-                <LoadingDots />
+                <span style={{ color: 'var(--clr-accent)' }}>Mapping your chart</span>
+                <span style={{ opacity: 0.5 }}>· · ·</span>
               </>
-            ) : step === 'location' ? (
-              <>Reveal my map <span style={{ opacity: 0.6 }}>→</span></>
-            ) : (
-              <>Continue <span style={{ opacity: 0.6 }}>→</span></>
-            )}
+            ) : step === 'location' ? 'Reveal my map →' : 'Continue →'}
           </button>
         </div>
       </div>
     </main>
-  )
-}
-
-function LoadingDots() {
-  return (
-    <span className="inline-flex gap-1 items-center">
-      {[0, 1, 2].map(i => (
-        <span
-          key={i}
-          className="block rounded-full"
-          style={{
-            width: '4px',
-            height: '4px',
-            background: 'var(--gold)',
-            animation: `glowPulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }}
-        />
-      ))}
-    </span>
   )
 }

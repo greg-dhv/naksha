@@ -9,39 +9,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        void: '#07070f',
-        surface: 'rgba(255,255,255,0.03)',
-        border: 'rgba(255,255,255,0.07)',
-        cream: '#f2ede4',
-        muted: '#6b6f88',
-        gold: '#c9a45a',
-        'gold-glow': 'rgba(201,164,90,0.18)',
+        bg:       'var(--clr-bg)',
+        raised:   'var(--clr-bg-raised)',
+        text:     'var(--clr-text)',
+        't2':     'var(--clr-text-2)',
+        't3':     'var(--clr-text-3)',
+        accent:   'var(--clr-accent)',
+        border:   'var(--clr-border)',
       },
       fontFamily: {
-        serif: ['Georgia', 'Cambria', '"Times New Roman"', 'serif'],
-        sans: ['system-ui', '-apple-system', 'sans-serif'],
+        display: ['var(--font-display)', 'Cormorant Garamond', 'Georgia', 'serif'],
+        label:   ['system-ui', '-apple-system', 'sans-serif'],
       },
-      animation: {
-        'fade-in': 'fadeIn 0.8s ease forwards',
-        'fade-up': 'fadeUp 0.7s ease forwards',
-        'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+      fontSize: {
+        'display': 'var(--text-display)',
+        'h1': 'var(--text-h1)',
+        'h2': 'var(--text-h2)',
+        'h3': 'var(--text-h3)',
+        'body': 'var(--text-body)',
+        'sm':  'var(--text-sm)',
+        'xs':  'var(--text-xs)',
+        'label': 'var(--text-label)',
       },
-      keyframes: {
-        fadeIn: {
-          from: { opacity: '0' },
-          to: { opacity: '1' },
-        },
-        fadeUp: {
-          from: { opacity: '0', transform: 'translateY(20px)' },
-          to: { opacity: '1', transform: 'translateY(0)' },
-        },
-        glowPulse: {
-          '0%, 100%': { opacity: '0.4' },
-          '50%': { opacity: '0.8' },
-        },
-      },
-      backdropBlur: {
-        xs: '2px',
+      letterSpacing: {
+        wide:  'var(--tracking-wide)',
+        wider: 'var(--tracking-wider)',
+        caps:  'var(--tracking-caps)',
       },
     },
   },

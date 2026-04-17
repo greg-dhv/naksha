@@ -1,155 +1,102 @@
 'use client'
 import { ChartResponse } from '@/lib/types'
 
-const PLANET_QUALITIES: Record<string, string> = {
-  Sun: 'Solar · Authority · Soul purpose',
-  Moon: 'Lunar · Feeling · Inner life',
-  Mars: 'Martial · Drive · Courage',
-  Mercury: 'Mercurial · Discernment · Communication',
-  Jupiter: 'Expansive · Wisdom · Grace',
-  Venus: 'Venusian · Beauty · Devotion',
-  Saturn: 'Saturnine · Discipline · Depth',
-  Rahu: 'Rahu · Ambition · The unknown frontier',
-  Ketu: 'Ketu · Liberation · Completion',
-}
-
 const PLANET_COLORS: Record<string, string> = {
-  Sun: '#f5c842',
-  Moon: '#d4e8f0',
-  Mars: '#e85c4a',
-  Mercury: '#7ec8a0',
-  Jupiter: '#f0a830',
-  Venus: '#e8a0c0',
-  Saturn: '#8899bb',
-  Rahu: '#a080c0',
-  Ketu: '#c0a070',
+  Sun: '#e8c84a', Moon: '#b8d4e8', Mars: '#d86050',
+  Mercury: '#70c090', Jupiter: '#e0a030', Venus: '#d890b0',
+  Saturn: '#7888a8', Rahu: '#9070b0', Ketu: '#b09060',
 }
 
-interface Props {
-  data: ChartResponse
-}
+const fmt = (d: string) => new Date(d).toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })
 
-export default function DashaCard({ data }: Props) {
+export default function DashaCard({ data }: { data: ChartResponse }) {
   const maha = data.dasha.current_mahadasha
   const antar = data.dasha.current_antardasha
 
-  const formatDate = (d: string) => {
-    const dt = new Date(d)
-    return dt.toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })
-  }
-
   const progress = () => {
     if (!maha) return 0
-    const start = new Date(maha.start_date).getTime()
-    const end = new Date(maha.end_date).getTime()
-    const now = Date.now()
-    return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
+    const s = new Date(maha.start_date).getTime()
+    const e = new Date(maha.end_date).getTime()
+    return Math.min(100, Math.max(0, ((Date.now() - s) / (e - s)) * 100))
   }
 
-  return (
-    <div
-      className="relative overflow-hidden"
-      style={{
-        background: 'rgba(255,255,255,0.028)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: '16px',
-        padding: '36px 36px 32px',
-      }}
-    >
-      {/* Ambient glow */}
-      {maha && (
-        <div
-          className="absolute -top-16 -left-16 pointer-events-none"
-          style={{
-            width: '260px',
-            height: '260px',
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${PLANET_COLORS[maha.planet]}15 0%, transparent 70%)`,
-          }}
-        />
-      )}
+  const pct = progress()
+  const color = maha ? (PLANET_COLORS[maha.planet] || 'var(--clr-accent)') : 'var(--clr-accent)'
 
-      <p className="text-xs tracking-widest uppercase mb-6" style={{ color: 'var(--gold)', opacity: 0.65 }}>
-        Your life season
-      </p>
+  return (
+    <div className="card">
+      <p className="label label--accent" style={{ marginBottom: '24px' }}>Your life season</p>
 
       {maha ? (
         <>
-          <div className="flex items-start justify-between gap-4 mb-6">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '24px' }}>
             <div>
               <h3
-                className="text-4xl font-serif mb-1"
-                style={{ color: PLANET_COLORS[maha.planet] || 'var(--cream)' }}
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--text-h1)',
+                  fontWeight: 300,
+                  color,
+                  lineHeight: 1.1,
+                  marginBottom: '6px',
+                }}
               >
                 {maha.planet}
               </h3>
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                {PLANET_QUALITIES[maha.planet]}
-              </p>
+              <p className="label">Mahadasha</p>
             </div>
-            <div className="text-right shrink-0">
-              <p className="text-xs mb-1" style={{ color: 'var(--muted)' }}>
-                {formatDate(maha.start_date)} →
-              </p>
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                {formatDate(maha.end_date)}
-              </p>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <p className="label" style={{ marginBottom: '4px' }}>{fmt(maha.start_date)}</p>
+              <p className="label">{fmt(maha.end_date)}</p>
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div
-            className="w-full h-px mb-2"
-            style={{ background: 'rgba(255,255,255,0.06)', position: 'relative', borderRadius: '1px' }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                height: '1px',
-                width: `${progress()}%`,
-                background: `linear-gradient(90deg, transparent, ${PLANET_COLORS[maha.planet] || 'var(--gold)'}80, ${PLANET_COLORS[maha.planet] || 'var(--gold)'})`,
-                borderRadius: '1px',
-                transition: 'width 1s ease',
-              }}
-            />
+          {/* Progress */}
+          <div style={{ height: '1px', background: 'var(--clr-border)', position: 'relative', marginBottom: '8px', borderRadius: '1px' }}>
+            <div style={{
+              position: 'absolute', left: 0, top: 0, height: '1px',
+              width: `${pct}%`,
+              background: `linear-gradient(90deg, transparent, ${color}90, ${color})`,
+              borderRadius: '1px',
+              transition: 'width 1s var(--ease-out)',
+            }} />
           </div>
-          <p className="text-xs mb-6" style={{ color: 'rgba(242,235,218,0.2)' }}>
-            {Math.round(progress())}% through this chapter
-          </p>
+          <p className="label" style={{ marginBottom: '28px' }}>{Math.round(pct)}% through this chapter</p>
 
           {/* Antardasha */}
           {antar && (
-            <div
-              className="mb-6 px-4 py-3 rounded-lg"
-              style={{
-                background: `${PLANET_COLORS[antar.planet] || 'rgba(255,255,255,0.03)'}10`,
-                border: `1px solid ${PLANET_COLORS[antar.planet] || 'rgba(255,255,255,0.07)'}30`,
-              }}
-            >
-              <p className="text-xs mb-1" style={{ color: 'rgba(242,235,218,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                Active sub-current
-              </p>
-              <p className="text-sm" style={{ color: PLANET_COLORS[antar.planet] || 'var(--cream)' }}>
-                {maha.planet} / {antar.planet} · until {formatDate(antar.end_date)}
+            <div style={{
+              padding: '14px 18px',
+              background: 'rgba(255,255,255,0.025)',
+              border: '1px solid var(--clr-border-2)',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: '28px',
+            }}>
+              <p className="label" style={{ marginBottom: '6px' }}>Active sub-current</p>
+              <p style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--text-sm)',
+                color: PLANET_COLORS[antar.planet] || 'var(--clr-text)',
+              }}>
+                {maha.planet} / {antar.planet} · until {fmt(antar.end_date)}
               </p>
             </div>
           )}
 
-          {/* Divider */}
-          <div className="my-6" style={{ height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+          <div className="divider" style={{ marginBottom: '28px' }} />
 
-          {/* AI reading */}
-          <p
-            className="text-base leading-loose"
-            style={{ color: 'rgba(242,235,218,0.78)', lineHeight: '1.95' }}
-          >
+          <p style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-body)',
+            color: 'var(--clr-text)',
+            opacity: 0.82,
+            lineHeight: 'var(--leading-loose)',
+          }}>
             {data.readings.life_season}
           </p>
         </>
       ) : (
-        <p style={{ color: 'var(--muted)' }}>Dasha data unavailable.</p>
+        <p className="label">Dasha data unavailable.</p>
       )}
     </div>
   )

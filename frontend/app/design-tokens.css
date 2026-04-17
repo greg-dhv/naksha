@@ -5,21 +5,21 @@
 
 :root {
   /* ── Palette ── */
-  --clr-bg:           #5a6a78;          /* steel blue */
+  --clr-bg:           #1e2d3a;          /* deep navy-slate */
   --clr-bg-raised:    rgba(255,255,255,0.07);
-  --clr-bg-deep:      #3a4e5c;          /* dark panel — modals, dropdowns */
-  --clr-bg-overlay:   rgba(52,66,76,0.88);
+  --clr-bg-deep:      #111b24;          /* dark panel — modals, dropdowns */
+  --clr-bg-overlay:   rgba(12,20,28,0.93);
 
   --clr-text:         #ffffff;
-  --clr-text-2:       rgba(255,255,255,0.58);
-  --clr-text-3:       rgba(255,255,255,0.32);
+  --clr-text-2:       rgba(255,255,255,0.65);
+  --clr-text-3:       rgba(255,255,255,0.40);
 
   --clr-accent:       #d4b896;          /* warm gold */
   --clr-accent-dim:   rgba(212,184,150,0.12);
   --clr-accent-line:  rgba(212,184,150,0.3);
 
-  --clr-border:       rgba(255,255,255,0.14);
-  --clr-border-2:     rgba(255,255,255,0.07);
+  --clr-border:       rgba(255,255,255,0.11);
+  --clr-border-2:     rgba(255,255,255,0.06);
 
   /* ── Typography ── */
   /* --font-display is injected by layout.tsx via next/font (Cormorant Garamond — readings prose) */
