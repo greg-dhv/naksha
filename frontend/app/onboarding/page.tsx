@@ -15,47 +15,6 @@ interface FormData {
   location: GeocodeResult | null
 }
 
-const S: Record<string, React.CSSProperties> = {
-  label: {
-    fontFamily: 'var(--font-label)',
-    fontSize: 'var(--text-label)',
-    letterSpacing: 'var(--tracking-caps)',
-    textTransform: 'uppercase' as const,
-    color: 'var(--clr-accent)',
-    opacity: 0.75,
-    marginBottom: '32px',
-    display: 'block',
-  },
-  question: {
-    fontFamily: 'var(--font-sans, "Nunito Sans", system-ui)',
-    fontSize: 'clamp(28px, 4vw, 40px)',
-    fontWeight: 200,
-    color: 'var(--clr-text)',
-    lineHeight: 1.2,
-    marginBottom: '12px',
-  },
-  hint: {
-    fontFamily: 'var(--font-label)',
-    fontSize: 'var(--text-xs)',
-    color: 'var(--clr-text-2)',
-    marginBottom: '40px',
-    lineHeight: 1.6,
-  },
-  input: {
-    width: '100%',
-    background: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid rgba(255,255,255,0.22)',
-    color: 'var(--clr-text)',
-    fontSize: 'clamp(22px, 3vw, 30px)',
-    fontFamily: 'var(--font-sans, "Nunito Sans", system-ui)',
-    fontWeight: 300,
-    padding: '8px 0 14px',
-    outline: 'none',
-    transition: 'border-color var(--dur-normal)',
-  },
-}
-
 export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('name')
@@ -137,126 +96,151 @@ export default function OnboardingPage() {
     ? new Date(form.birth_date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
+  const labelStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-sans)', fontSize: '11px',
+    letterSpacing: '0.22em', textTransform: 'uppercase',
+    color: 'var(--nk-primary)', marginBottom: '28px', display: 'block',
+  }
+
+  const questionStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-sans)', fontSize: 'clamp(26px, 4vw, 38px)',
+    fontWeight: 200, color: 'var(--nk-text)', lineHeight: 1.2, marginBottom: '10px',
+  }
+
+  const hintStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-sans)', fontSize: '13px',
+    color: 'var(--nk-text-3)', marginBottom: '36px', lineHeight: 1.65,
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%', background: 'transparent', border: 'none',
+    borderBottom: '1px solid var(--nk-border)',
+    color: 'var(--nk-text)', fontSize: 'clamp(22px, 3vw, 30px)',
+    fontFamily: 'var(--font-sans)', fontWeight: 300,
+    padding: '8px 0 14px', outline: 'none',
+    transition: 'border-color 200ms ease',
+  }
+
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: 'var(--clr-bg)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '80px 24px',
-        position: 'relative',
-      }}
-    >
+    <main style={{
+      minHeight: '100vh', background: 'var(--nk-ground)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '80px 24px', position: 'relative',
+    }}>
       {/* Back */}
       {stepIndex > 0 && (
         <button
           onClick={back}
           style={{
-            position: 'absolute', top: '36px', left: '52px',
-            fontFamily: 'var(--font-label)',
-            fontSize: 'var(--text-label)',
-            letterSpacing: 'var(--tracking-caps)',
-            textTransform: 'uppercase',
-            color: 'var(--clr-text-3)',
-            background: 'none', border: 'none', cursor: 'pointer',
-            transition: 'color var(--dur-normal)',
+            position: 'absolute', top: '36px', left: '40px',
+            fontFamily: 'var(--font-sans)', fontSize: '11px',
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: 'var(--nk-text-3)', background: 'none', border: 'none',
+            cursor: 'pointer', transition: 'color 200ms ease',
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--clr-text-2)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--clr-text-3)')}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--nk-primary)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--nk-text-3)')}
         >
           ← Back
         </button>
       )}
 
+      {/* Logo */}
+      <div style={{ position: 'absolute', top: '36px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{
+          width: '20px', height: '20px', borderRadius: '50%',
+          background: 'var(--nk-primary-dim)', border: '1px solid var(--nk-primary-line)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '8px', color: 'var(--nk-primary)',
+        }}>✦</div>
+        <span style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 600, color: 'var(--nk-text-3)' }}>
+          Naksha
+        </span>
+      </div>
+
       {/* Progress */}
-      <div style={{ position: 'absolute', top: '42px', display: 'flex', gap: '8px' }}>
+      <div style={{ position: 'absolute', top: '44px', right: '40px', display: 'flex', gap: '6px' }}>
         {STEPS.map((s, i) => (
-          <div
-            key={s}
-            style={{
-              height: '2px',
-              width: i === stepIndex ? '28px' : '8px',
-              background: i <= stepIndex ? 'var(--clr-accent)' : 'var(--clr-border)',
-              borderRadius: '1px',
-              opacity: i <= stepIndex ? 0.7 : 0.4,
-              transition: 'width var(--dur-normal) var(--ease), background var(--dur-normal)',
-            }}
-          />
+          <div key={s} style={{
+            height: '2px',
+            width: i === stepIndex ? '24px' : '8px',
+            background: i <= stepIndex ? 'var(--nk-primary)' : 'var(--nk-border)',
+            borderRadius: '1px',
+            opacity: i <= stepIndex ? 0.8 : 0.4,
+            transition: 'width var(--dur-normal) var(--ease), background var(--dur-normal)',
+          }} />
         ))}
       </div>
 
       {/* Form */}
-      <div
-        className={visible ? 'page-visible' : 'page-enter'}
-        style={{ width: '100%', maxWidth: '480px' }}
-      >
-        {/* ── NAME ── */}
+      <div className={visible ? 'page-visible' : 'page-enter'} style={{ width: '100%', maxWidth: '480px' }}>
+
+        {/* NAME */}
         {step === 'name' && (
           <div>
-            <span style={S.label}>Begin</span>
-            <h2 style={S.question}>How should we call you?</h2>
-            <p style={S.hint}>Your name makes the reading feel personal.</p>
+            <span style={labelStyle}>Begin</span>
+            <h2 style={questionStyle}>How should we call you?</h2>
+            <p style={hintStyle}>Your name makes the reading feel personal.</p>
             <input
-              ref={inputRef}
-              type="text"
-              placeholder="Your name"
+              ref={inputRef} type="text" placeholder="Your name"
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               onKeyDown={e => e.key === 'Enter' && next()}
-              style={S.input}
-              autoComplete="given-name"
+              style={inputStyle} autoComplete="given-name"
+              onFocus={e => (e.currentTarget.style.borderBottomColor = 'var(--nk-primary)')}
+              onBlur={e => (e.currentTarget.style.borderBottomColor = 'var(--nk-border)')}
             />
           </div>
         )}
 
-        {/* ── DATE ── */}
+        {/* DATE */}
         {step === 'date' && (
           <div>
-            <span style={S.label}>{form.name}</span>
-            <h2 style={S.question}>When were you born?</h2>
-            <p style={S.hint}>Your birth date anchors your karmic map.</p>
+            <span style={labelStyle}>{form.name}</span>
+            <h2 style={questionStyle}>When were you born?</h2>
+            <p style={hintStyle}>Your birth date anchors your karmic map.</p>
             <input
-              ref={inputRef}
-              type="date"
+              ref={inputRef} type="date"
               value={form.birth_date}
               onChange={e => setForm(f => ({ ...f, birth_date: e.target.value }))}
               onKeyDown={e => e.key === 'Enter' && next()}
-              style={S.input}
+              style={inputStyle}
               max={new Date().toISOString().split('T')[0]}
+              onFocus={e => (e.currentTarget.style.borderBottomColor = 'var(--nk-primary)')}
+              onBlur={e => (e.currentTarget.style.borderBottomColor = 'var(--nk-border)')}
             />
             {writtenDate && (
-              <p style={{ marginTop: '14px', fontFamily: 'var(--font-label)', fontSize: 'var(--text-sm)', color: 'var(--clr-accent)', opacity: 0.75 }}>
+              <p style={{ marginTop: '14px', fontFamily: 'var(--font-sans)', fontSize: '15px', color: 'var(--nk-primary)', opacity: 0.8 }}>
                 {writtenDate}
               </p>
             )}
           </div>
         )}
 
-        {/* ── TIME ── */}
+        {/* TIME */}
         {step === 'time' && (
           <div>
-            <span style={S.label}>{form.name}</span>
-            <h2 style={S.question}>What time were you born?</h2>
-            <p style={S.hint}>Your rising sign depends on the hour. As precise as you know.</p>
+            <span style={labelStyle}>{form.name}</span>
+            <h2 style={questionStyle}>What time were you born?</h2>
+            <p style={hintStyle}>Your rising sign depends on the hour. As precise as you know.</p>
             {!form.birth_time_unknown ? (
               <>
                 <input
-                  ref={inputRef}
-                  type="time"
+                  ref={inputRef} type="time"
                   value={form.birth_time}
                   onChange={e => setForm(f => ({ ...f, birth_time: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && next()}
-                  style={S.input}
+                  style={inputStyle}
+                  onFocus={e => (e.currentTarget.style.borderBottomColor = 'var(--nk-primary)')}
+                  onBlur={e => (e.currentTarget.style.borderBottomColor = 'var(--nk-border)')}
                 />
                 <button
                   onClick={() => setForm(f => ({ ...f, birth_time_unknown: true, birth_time: '' }))}
                   style={{
                     marginTop: '20px', background: 'none', border: 'none', cursor: 'pointer',
-                    fontFamily: 'var(--font-label)', fontSize: 'var(--text-label)',
-                    letterSpacing: '0.1em', color: 'var(--clr-text-3)',
+                    fontFamily: 'var(--font-sans)', fontSize: '12px',
+                    letterSpacing: '0.04em', color: 'var(--nk-text-3)',
                     textDecoration: 'underline', textUnderlineOffset: '3px',
                   }}
                 >
@@ -265,15 +249,15 @@ export default function OnboardingPage() {
               </>
             ) : (
               <div>
-                <p style={{ ...S.hint, fontStyle: 'italic', marginBottom: '16px' }}>
+                <p style={{ ...hintStyle, fontStyle: 'italic', marginBottom: '16px' }}>
                   We'll use noon as a reference. Planets and life season will be accurate; house positions approximate.
                 </p>
                 <button
                   onClick={() => setForm(f => ({ ...f, birth_time_unknown: false }))}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
-                    fontFamily: 'var(--font-label)', fontSize: 'var(--text-label)',
-                    letterSpacing: '0.12em', color: 'var(--clr-accent)', opacity: 0.7,
+                    fontFamily: 'var(--font-sans)', fontSize: '12px',
+                    letterSpacing: '0.08em', color: 'var(--nk-primary)',
                   }}
                 >
                   I do know my birth time →
@@ -283,50 +267,59 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* ── LOCATION ── */}
+        {/* LOCATION */}
         {step === 'location' && (
           <div>
-            <span style={S.label}>{form.name}</span>
-            <h2 style={S.question}>Where were you born?</h2>
-            <p style={S.hint}>City and country is enough.</p>
+            <span style={labelStyle}>{form.name}</span>
+            <h2 style={questionStyle}>Where were you born?</h2>
+            <p style={hintStyle}>City and country is enough.</p>
             <div style={{ position: 'relative' }}>
               <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search a city…"
+                ref={inputRef} type="text" placeholder="Search a city…"
                 value={form.location ? form.location.short_name : locationQuery}
                 onChange={e => searchLocation(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && form.location) next() }}
-                style={{ ...S.input, color: form.location ? 'var(--clr-accent)' : 'var(--clr-text)' }}
+                style={{ ...inputStyle, color: form.location ? 'var(--nk-primary)' : 'var(--nk-text)' }}
+                onFocus={e => (e.currentTarget.style.borderBottomColor = 'var(--nk-primary)')}
+                onBlur={e => (e.currentTarget.style.borderBottomColor = form.location ? 'var(--nk-primary)' : 'var(--nk-border)')}
                 autoComplete="off"
               />
               {searching && (
-                <span style={{ position: 'absolute', right: 0, bottom: '14px', fontFamily: 'var(--font-label)', fontSize: '10px', color: 'var(--clr-text-3)', letterSpacing: '0.12em' }}>
+                <span style={{
+                  position: 'absolute', right: 0, bottom: '14px',
+                  fontFamily: 'var(--font-sans)', fontSize: '10px',
+                  color: 'var(--nk-text-4)', letterSpacing: '0.12em',
+                }}>
                   searching…
                 </span>
               )}
               {locationResults.length > 0 && !form.location && (
                 <div style={{
-                  position: 'absolute', top: '100%', marginTop: '4px', width: '100%', zIndex: 20,
-                  background: '#3a4e5c', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 'var(--radius-md)',
+                  position: 'absolute', top: '100%', marginTop: '4px',
+                  width: '100%', zIndex: 20,
+                  background: 'var(--nk-surface-2)',
+                  border: '1px solid var(--nk-border)',
+                  borderRadius: 'var(--nk-r-md)',
                   overflow: 'hidden',
+                  boxShadow: 'var(--nk-shadow-md)',
                 }}>
                   {locationResults.map((r, i) => (
                     <button
                       key={i}
                       onClick={() => { setForm(f => ({ ...f, location: r })); setLocationResults([]); setLocationQuery(r.short_name) }}
                       style={{
-                        width: '100%', textAlign: 'left', padding: '14px 18px', background: 'none',
-                        border: 'none', borderBottom: i < locationResults.length - 1 ? '1px solid var(--clr-border-2)' : 'none',
+                        width: '100%', textAlign: 'left', padding: '13px 18px',
+                        background: 'none', border: 'none',
+                        borderBottom: i < locationResults.length - 1 ? '1px solid var(--nk-border-hair)' : 'none',
                         cursor: 'pointer', transition: 'background var(--dur-fast)',
                       }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(200,170,110,0.05)')}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--nk-primary-dim)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                     >
-                      <span style={{ fontFamily: 'var(--font-label)', fontWeight: 400, fontSize: 'var(--text-sm)', color: 'var(--clr-text)', display: 'block' }}>
+                      <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 400, fontSize: '15px', color: 'var(--nk-text)', display: 'block' }}>
                         {r.short_name}
                       </span>
-                      <span style={{ fontFamily: 'var(--font-label)', fontSize: '11px', color: 'var(--clr-text-3)', display: 'block', marginTop: '2px' }}>
+                      <span style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: 'var(--nk-text-3)', display: 'block', marginTop: '2px' }}>
                         {r.display_name}
                       </span>
                     </button>
@@ -337,9 +330,8 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Error */}
         {error && (
-          <p style={{ marginTop: '16px', fontFamily: 'var(--font-label)', fontSize: 'var(--text-xs)', color: '#e06a6a' }}>
+          <p style={{ marginTop: '16px', fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'var(--nk-danger)' }}>
             {error}
           </p>
         )}
@@ -350,17 +342,18 @@ export default function OnboardingPage() {
             onClick={next}
             disabled={!canProceed() || loading}
             style={{
-              background: 'none', border: 'none', cursor: canProceed() && !loading ? 'pointer' : 'not-allowed',
-              fontFamily: 'var(--font-label)', fontSize: 'var(--text-label)',
-              letterSpacing: 'var(--tracking-caps)', textTransform: 'uppercase',
-              color: canProceed() && !loading ? 'var(--clr-text)' : 'var(--clr-text-3)',
+              background: 'none', border: 'none',
+              cursor: canProceed() && !loading ? 'pointer' : 'not-allowed',
+              fontFamily: 'var(--font-sans)', fontSize: '11px',
+              letterSpacing: '0.22em', textTransform: 'uppercase',
+              color: canProceed() && !loading ? 'var(--nk-text)' : 'var(--nk-text-4)',
               transition: 'color var(--dur-normal)',
               display: 'flex', alignItems: 'center', gap: '10px',
             }}
           >
             {loading ? (
               <>
-                <span style={{ color: 'var(--clr-accent)' }}>Mapping your chart</span>
+                <span style={{ color: 'var(--nk-primary)' }}>Mapping your chart</span>
                 <span style={{ opacity: 0.5 }}>· · ·</span>
               </>
             ) : step === 'location' ? 'Reveal my map →' : 'Continue →'}

@@ -106,17 +106,22 @@ export interface KarmicAxis {
   axis_name: string
 }
 
+export interface StandoutItem {
+  headline: string
+  body: string
+  tag: string
+}
+
 export interface CoreReading {
   who_are_you: string
-  what_stands_out: string
-  how_you_come_across: string
-  inner_world: string
-  what_drives_you: string
+  what_stands_out: StandoutItem[]
+  presence_and_inner_world: string
 }
 
 export interface Archetype {
   name: string
   description: string
+  strength_labels?: string[]
 }
 
 export interface NaturalPowers {
@@ -125,26 +130,24 @@ export interface NaturalPowers {
 }
 
 export interface GrowthPath {
-  life_teaching: string
   dharma: string
-  spiritual_path: string
+  what_to_create: string
+  growth_blocks: string
+}
+
+export interface SoulTheme {
+  theme: string
+  description: string
+  past_life_labels?: string[]
 }
 
 export interface SoulHistory {
-  soul_knows: string
-  past_life_themes: string
+  soul_themes: SoulTheme[]
 }
 
-export interface EnergyReading {
-  dominant_force: string
-  shiva_score: number
-  shakti_score: number
-  vishnu_score: number
-  shiva_explanation: string
-  shakti_explanation: string
-  vishnu_explanation: string
-  cultivate: string
-  practices: string
+export interface LoveReading {
+  love_style: string
+  relationship_needs: string
 }
 
 export interface Readings {
@@ -158,7 +161,7 @@ export interface Readings {
   natural_powers?: NaturalPowers
   growth_path?: GrowthPath
   soul_history?: SoulHistory
-  energy?: EnergyReading
+  love?: LoveReading
 }
 
 export interface ChartMeta {
@@ -183,4 +186,55 @@ export interface GeocodeResult {
   short_name: string
   lat: number
   lon: number
+}
+
+// ── Auth ──────────────────────────────────────────────
+export interface AuthUser {
+  id: string
+  email: string
+  username: string
+  has_chart: boolean
+}
+
+export interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export interface BondCategory {
+  label: string
+  score: number
+  narrative: string
+}
+
+export interface BondAspect {
+  aspect: string
+  meaning: string
+}
+
+export interface BondReport {
+  archetype_name: string
+  archetype_tagline: string
+  score: number
+  core_dynamic: string
+  categories: BondCategory[]
+  key_aspects: BondAspect[]
+  strengths: string[]
+  growth_edges: string[]
+  closing_question: string
+}
+
+export interface BondResult {
+  id: string
+  report: BondReport
+  relationship_type: string
+  person1: { username: string; name: string }
+  person2: { username: string; name: string }
+}
+
+export interface UserSearchResult {
+  id: string
+  username: string
+  has_chart: boolean
 }

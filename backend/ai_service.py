@@ -39,7 +39,19 @@ def _extract_json(text: str) -> dict:
     return {}
 
 
-SYSTEM = """You are the voice of Naksha, a Vedic astrology guide. You speak directly, warmly, and with precision. You interpret specific chart data — never speak in generalities. You write in flowing prose, never bullet points. You speak in second person ("you", "your"). You explain Vedic concepts in plain English first, naming the Sanskrit term only after. You empower the reader's agency — this is a map of their nature, not their fate. You never predict specific events — you illuminate patterns and energies."""
+SYSTEM = """You are the voice of Naksha, a Vedic astrology guide. You speak directly, warmly, and with precision. You interpret specific chart data — never speak in generalities.
+
+Your writing rules:
+- Write in flowing prose only. Never use bullet points, numbered lists, or headers in your prose responses.
+- Always speak in second person: "you", "your". Never address the reader by name. Never use their name in any response.
+- Explain all Vedic concepts in plain, accessible English first. Name the Sanskrit term only in parentheses after, if at all. Write for someone who is new to Vedic astrology — warm and welcoming, never jargon-heavy.
+- Never use em-dashes, en-dashes, or hyphens to connect ideas within sentences. Use commas or begin a new sentence instead.
+- Keep answers rich and personal but not overwhelming. Aim for warmth over volume.
+- Empower the reader's agency. This is a map of their nature, not their fate.
+- Never predict specific events. Illuminate patterns and energies only.
+- Say "this suggests" or "this points toward", never "this will happen".
+- Be honest about challenges. Do not sugarcoat Saturn, 8th house, or difficult placements.
+- Make every answer feel like a mirror the reader recognizes themselves in."""
 
 
 def nakshatra_archetype_reading(
@@ -50,13 +62,13 @@ def nakshatra_archetype_reading(
     moon_house: int,
     lagna_sign: str,
 ) -> str:
-    user = f"""Write a nakshatra archetype reading for {name}.
+    user = f"""Write a nakshatra archetype reading.
 
 Chart data:
 - Moon in {moon_sign} (house {moon_house}), birth star: {moon_nakshatra}, pada {moon_pada}
 - Rising sign (lagna): {lagna_sign}
 
-Write approximately 150 words. Focus on the core emotional archetype and soul essence of the {moon_nakshatra} nakshatra — what it means to be this kind of person at the deepest level. Reference their pada and sign placement where meaningful. Make it feel like a mirror that knows them. End on an empowering note."""
+Write approximately 150 words. Focus on the core emotional archetype and soul essence of the {moon_nakshatra} nakshatra. What does it mean to be this kind of person at the deepest level? Reference their pada and sign placement where meaningful. Make it feel like a mirror that knows them. End on an empowering note."""
     return _call(SYSTEM, user)
 
 
@@ -76,16 +88,16 @@ def life_season_reading(
     if antar_planet and antar_end:
         antar_context = f"\n- Current sub-period (antardasha): {antar_planet}, active until {antar_end}"
 
-    user = f"""Write a current life season reading for {name}.
+    user = f"""Write a current life season reading.
 
 Chart data:
 - Rising sign: {lagna_sign}
 - Moon in {moon_sign}, birth star: {moon_nakshatra}
 
 Current dasha period:
-- Major period (mahadasha): {maha_planet} — began {maha_start}, ends {maha_end} ({maha_years:.1f} years total){antar_context}
+- Major period (mahadasha): {maha_planet}, began {maha_start}, ends {maha_end} ({maha_years:.1f} years total){antar_context}
 
-Write approximately 200 words. Describe the texture, themes, gifts, and challenges of this {maha_planet} mahadasha. If there is an active antardasha, weave it in as the specific current within the larger tide. Connect to their lagna and Moon nakshatra to make it personal."""
+Write approximately 200 words. Describe the texture, themes, gifts, and challenges of this {maha_planet} mahadasha in plain language. If there is an active antardasha, weave it in as the specific current within the larger tide. Connect to the rising sign and Moon nakshatra to make it personal."""
     return _call(SYSTEM, user)
 
 
@@ -99,7 +111,7 @@ def essence_reading(
     sun_house: int,
     maha_planet: str,
 ) -> str:
-    user = f"""Write an "at a glance" essence reading for {name} — a 2-paragraph distillation of who this chart belongs to. Not a horoscope. A mirror.
+    user = f"""Write an "at a glance" essence reading. A 2-paragraph distillation of who this chart belongs to. Not a horoscope. A mirror.
 
 Chart data:
 - Rising sign: {lagna_sign} ({lagna_nakshatra})
@@ -107,7 +119,7 @@ Chart data:
 - Sun in {sun_sign}, house {sun_house}
 - Current major period: {maha_planet} mahadasha
 
-Write exactly 2 paragraphs, approximately 80 words each. First paragraph: the core nature — how this person moves through the world, what they feel and how they're wired. Second paragraph: the chart's defining paradox or tension — the deeper pattern that runs beneath everything. Make it extraordinary. This is the only part of the chart most users will read in full."""
+Write exactly 2 paragraphs, approximately 80 words each. First paragraph: the core nature, how this person moves through the world, what they feel and how they are wired. Second paragraph: the chart's defining paradox or tension, the deeper pattern that runs beneath everything. Make it extraordinary. This is what most people will read first."""
     return _call(SYSTEM, user, max_tokens=600)
 
 
@@ -118,7 +130,7 @@ def three_pillars_reading(
     sun_sign: str, sun_nakshatra: str, sun_degree: float, sun_house: int, sun_pada: int,
 ) -> dict:
     """Returns {"ascendant": "phrase", "moon": "phrase", "sun": "phrase"}"""
-    user = f"""For {name}'s Vedic chart, write a short archetype phrase for each of the three pillars. Each phrase should be 2-3 sentences (20-30 words), italic in feel — a crystallized description of what this placement IS at its essence.
+    user = f"""For this Vedic chart, write a short archetype phrase for each of the three pillars. Each phrase should be 2-3 sentences (20-30 words), crystallized and direct, describing what this placement IS at its essence.
 
 Three pillars:
 1. Ascendant (Lagna): {lagna_sign} {lagna_degree:.0f}° · {lagna_nakshatra} pada {lagna_pada}
@@ -142,21 +154,21 @@ def karmic_axis_reading(
     rahu_sign: str, rahu_house: int, rahu_nakshatra: str,
 ) -> dict:
     """Returns {"ketu": "...", "rahu": "...", "axis_name": "..."}"""
-    user = f"""Write the karmic axis reading for {name}.
+    user = f"""Write the karmic axis reading for this birth chart.
 
 Ketu (past mastery, what the soul has already learned):
-- {ketu_sign} · house {ketu_house} · {ketu_nakshatra}
+- {ketu_sign}, house {ketu_house}, {ketu_nakshatra}
 
 Rahu (soul's hunger, what this life is asking to grow toward):
-- {rahu_sign} · house {rahu_house} · {rahu_nakshatra}
+- {rahu_sign}, house {rahu_house}, {rahu_nakshatra}
 
 Return ONLY a JSON object with keys "ketu", "rahu", "axis_name".
 - "ketu": 2-3 sentences (~50 words) on what the soul has mastered and why returning there keeps it safe but small
-- "rahu": 2-3 sentences (~50 words) on the soul's growth direction — what it's hungry for, why it's uncomfortable, why it's necessary
+- "rahu": 2-3 sentences (~50 words) on the soul's growth direction, what it is hungry for, why it is uncomfortable, why it is necessary
 - "axis_name": a short poetic name for this axis (e.g. "The axis of self and partnership")
 
 Example:
-{{"ketu": "You've already mastered...", "rahu": "The soul wants...", "axis_name": "The axis of..."}}"""
+{{"ketu": "You have already mastered...", "rahu": "The soul wants...", "axis_name": "The axis of..."}}"""
     raw = _call(SYSTEM, user, max_tokens=500)
     result = _extract_json(raw)
     return {
@@ -173,12 +185,12 @@ def all_planet_readings(
 ) -> dict:
     """Returns {"Sun": "reading...", "Moon": "reading...", ...}"""
     planet_lines = "\n".join([
-        f"- {p['name']}: {p['sign']} {p['degree']:.0f}° · house {p['house']} · {p['nakshatra']} pada {p['pada']}"
+        f"- {p['name']}: {p['sign']} {p['degree']:.0f}°, house {p['house']}, {p['nakshatra']} pada {p['pada']}"
         + (" (retrograde)" if p.get('is_retrograde') else "")
         for p in planets
     ])
 
-    user = f"""Write a brief planet interpretation for each of the 9 grahas in {name}'s chart. Each reading should be 2-3 sentences (~60-70 words) — specific, direct, personal. Reference the sign, nakshatra, and house placement. This is what each planet means FOR THEM specifically.
+    user = f"""Write a brief planet interpretation for each of the 9 grahas in this chart. Each reading should be 2-3 sentences (~60-70 words), specific, direct, and personal. Reference the sign, nakshatra, and house placement. Explain what each planet means for this person specifically, in plain language.
 
 Chart context:
 - Rising sign (Lagna): {lagna_sign}
@@ -187,12 +199,12 @@ Planets:
 {planet_lines}
 
 Return ONLY a JSON object with planet names as keys. Example:
-{{"Sun": "Your Sun is at maximum strength...", "Moon": "...", "Mars": "...", "Mercury": "...", "Jupiter": "...", "Venus": "...", "Saturn": "...", "Rahu": "...", "Ketu": "..."}}"""
+{{"Sun": "Your Sun sits in a position of...", "Moon": "...", "Mars": "...", "Mercury": "...", "Jupiter": "...", "Venus": "...", "Saturn": "...", "Rahu": "...", "Ketu": "..."}}"""
     raw = _call(SYSTEM, user, max_tokens=2000)
     return _extract_json(raw)
 
 
-# ── New reading categories ─────────────────────────────────────────────────────
+# ── Reading sections ──────────────────────────────────────────────────────────
 
 def core_reading(
     name: str,
@@ -203,30 +215,37 @@ def core_reading(
     mars_sign: str, mars_house: int,
     maha_planet: str,
 ) -> dict:
-    """Returns {who_are_you, what_stands_out, how_you_come_across, inner_world, what_drives_you}"""
-    user = f"""For {name}'s Vedic birth chart, answer these 5 core identity questions. Each answer: 3-4 sentences (~80-100 words), deeply personal, specific to the placements. Flowing prose only.
+    """Returns {who_are_you, what_stands_out (array), presence_and_inner_world}"""
+    user = f"""For this Vedic birth chart, answer these core identity questions with warmth and precision.
 
 Chart data:
-- Lagna (rising): {lagna_sign} · {lagna_nakshatra} pada {lagna_pada}
-- Moon: {moon_sign} house {moon_house} · {moon_nakshatra}
-- Sun: {sun_sign} house {sun_house} · {sun_nakshatra}
+- Lagna (rising): {lagna_sign}, {lagna_nakshatra} pada {lagna_pada}
+- Moon: {moon_sign} house {moon_house}, {moon_nakshatra}
+- Sun: {sun_sign} house {sun_house}, {sun_nakshatra}
 - Saturn: {saturn_sign} house {saturn_house}
 - Mars: {mars_sign} house {mars_house}
 - Current mahadasha: {maha_planet}
 
-Questions:
-1. "Who are you?" — the essential nature of this person, what makes them distinctly themselves
-2. "What stands out in your chart?" — the most striking feature a Vedic astrologer would notice first; reference specific placements
-3. "How do you come across?" — the outer persona, first impression, how others perceive them (Lagna-driven)
-4. "How is your inner world?" — the emotional and mental interior (Moon-dominant)
-5. "What drives you?" — the core motivating force, the engine beneath the surface (Sun + Mars)
+Return ONLY a JSON object with exactly these keys:
 
-Return ONLY a JSON object:
-{{"who_are_you": "...", "what_stands_out": "...", "how_you_come_across": "...", "inner_world": "...", "what_drives_you": "..."}}"""
+1. "who_are_you": 3-4 sentences (~90 words) — the essential nature of this person, what makes them distinctly themselves at their core. The first sentence should be a high-level summary that could stand alone. The following sentences add texture.
+
+2. "what_stands_out": an array of 3-4 objects, each highlighting one striking feature of this chart. Each object has:
+   - "headline": 4-7 words naming the striking feature (e.g. "Jupiter elevated in the 5th house", "A rare Gaja Kesari formation")
+   - "body": 2 sentences (~40 words) on why this matters specifically for this person
+   - "tag": 1-3 words showing the astrological source (e.g. "Jupiter H5", "Moon yoga", "Saturn Rx")
+
+3. "presence_and_inner_world": 3-4 sentences (~90 words) — a merged portrait of how this person comes across to others (shaped by their rising sign) alongside the emotional world they carry within (shaped by their Moon). First sentence: the outer impression. Remaining sentences: the inner landscape.
+
+Format:
+{{"who_are_you": "...", "what_stands_out": [{{"headline": "...", "body": "...", "tag": "..."}}, ...], "presence_and_inner_world": "..."}}"""
     raw = _call(SYSTEM, user, max_tokens=1800)
     result = _extract_json(raw)
-    keys = ["who_are_you", "what_stands_out", "how_you_come_across", "inner_world", "what_drives_you"]
-    return {k: result.get(k, "") for k in keys}
+    return {
+        "who_are_you": result.get("who_are_you", ""),
+        "what_stands_out": result.get("what_stands_out", []),
+        "presence_and_inner_world": result.get("presence_and_inner_world", ""),
+    }
 
 
 def natural_powers_reading(
@@ -241,11 +260,11 @@ def natural_powers_reading(
 ) -> dict:
     """Returns {gifts: str, archetypes: [{name, description}]}"""
     yoga_str = ", ".join([y['name'] for y in yogas]) if yogas else "none detected"
-    user = f"""For {name}'s Vedic birth chart, identify their natural gifts and archetypal identities.
+    user = f"""For this Vedic birth chart, identify natural gifts and archetypal identities.
 
 Chart data:
-- Lagna: {lagna_sign} · {lagna_nakshatra}
-- Moon: {moon_sign} · {moon_nakshatra}
+- Lagna: {lagna_sign}, {lagna_nakshatra}
+- Moon: {moon_sign}, {moon_nakshatra}
 - Jupiter: {jupiter_sign} house {jupiter_house}
 - Mercury: {mercury_sign} house {mercury_house}
 - Venus: {venus_sign} house {venus_house}
@@ -253,18 +272,21 @@ Chart data:
 - Active yogas: {yoga_str}
 
 Return ONLY a JSON object with:
-- "gifts": 3-4 sentences (~90 words) on their natural gifts — what comes easily, what they were born to do well, where they find flow
-- "archetypes": array of exactly 5 objects, each with "name" (2-3 words, e.g. "The Mystic Healer") and "description" (1-2 sentences, ~30 words, on why this archetype fits this chart specifically)
+- "gifts": 3-4 sentences (~90 words) on natural gifts. What comes easily, what they were born to do well, where they find flow. Weave in references to 2-3 of the archetypes below to show how those gifts express.
+- "archetypes": array of exactly 5 objects. Each archetype is a living pattern in this chart. Each has:
+  - "name": 2-3 words (e.g. "The Mystic Healer", "The Visionary Builder")
+  - "description": 2-3 sentences (~50 words) — first describe what this archetype IS in this chart based on specific placements; then name the specific strength or gift it brings to their life in practical terms
+  - "strength_labels": an array of 2-3 short strings (2-4 words each) naming the core strengths this archetype brings (e.g. ["Deep Intuition", "Natural Authority"], ["Empathic Clarity", "Healing Presence", "Boundary Wisdom"])
 
-{{"gifts": "...", "archetypes": [{{"name": "...", "description": "..."}}, ...]}}"""
-    raw = _call(SYSTEM, user, max_tokens=900)
+{{"gifts": "...", "archetypes": [{{"name": "...", "description": "...", "strength_labels": ["...", "..."]}}, ...]}}"""
+    raw = _call(SYSTEM, user, max_tokens=1000)
     result = _extract_json(raw)
     archetypes = result.get("archetypes", [])
     if not isinstance(archetypes, list):
         archetypes = []
     return {
         "gifts": result.get("gifts", ""),
-        "archetypes": [{"name": a.get("name", ""), "description": a.get("description", "")} for a in archetypes[:5]],
+        "archetypes": [{"name": a.get("name", ""), "description": a.get("description", ""), "strength_labels": a.get("strength_labels", [])} for a in archetypes[:5]],
     }
 
 
@@ -275,28 +297,32 @@ def growth_path_reading(
     rahu_sign: str, rahu_house: int, rahu_nakshatra: str,
     saturn_sign: str, saturn_house: int,
     jupiter_sign: str, jupiter_house: int,
+    tenth_house_sign: str,
+    debilitated_planets: str,
     maha_planet: str,
 ) -> dict:
-    """Returns {life_teaching, dharma, spiritual_path}"""
-    user = f"""For {name}'s Vedic birth chart, illuminate their growth path.
+    """Returns {dharma, what_to_create, growth_blocks}"""
+    user = f"""For this Vedic birth chart, illuminate the life path and growth journey.
 
 Chart data:
 - Lagna: {lagna_sign}
-- Moon: {moon_sign} · {moon_nakshatra}
-- Rahu (soul's direction): {rahu_sign} house {rahu_house} · {rahu_nakshatra}
-- Saturn (life lessons): {saturn_sign} house {saturn_house}
-- Jupiter (wisdom and dharma): {jupiter_sign} house {jupiter_house}
+- Moon: {moon_sign}, {moon_nakshatra}
+- Rahu (soul's direction, life hunger): {rahu_sign} house {rahu_house}, {rahu_nakshatra}
+- Saturn (life lessons, discipline): {saturn_sign} house {saturn_house}
+- Jupiter (wisdom, dharma, expansion): {jupiter_sign} house {jupiter_house}
+- 10th house (public role, vocation): {tenth_house_sign}
+- Debilitated planets (areas of challenge): {debilitated_planets}
 - Current mahadasha: {maha_planet}
 
 Return ONLY a JSON object with:
-- "life_teaching": 3-4 sentences (~90 words) on the core lessons life is bringing — what Saturn and the current dasha are asking them to face and integrate
-- "dharma": 3-4 sentences (~90 words) on their life purpose — what they are here to build, create, or offer; how Jupiter and Rahu define their path
-- "spiritual_path": 3-4 sentences (~90 words) on their inner path — the practices, philosophies, or modes of inquiry that will most open them; what their chart suggests about their relationship to the sacred
+- "dharma": 3-4 sentences (~90 words) on soul's purpose. What is this person here to contribute, offer, or embody? How do Jupiter and Rahu define the life direction? Explain in accessible terms what dharma means before using the word.
+- "what_to_create": 3-4 sentences (~90 words) on what they are here to build or create in this world. The tangible work, mission, or legacy this chart points toward. Keep it practical and specific to the placements.
+- "growth_blocks": 3-4 sentences (~90 words) on what tends to block growth. The patterns, fears, or resistances Saturn and any difficult placements reveal. Be honest and compassionate, not harsh. Frame as "what to face" not "what is wrong".
 
-{{"life_teaching": "...", "dharma": "...", "spiritual_path": "..."}}"""
+{{"dharma": "...", "what_to_create": "...", "growth_blocks": "..."}}"""
     raw = _call(SYSTEM, user, max_tokens=1100)
     result = _extract_json(raw)
-    return {k: result.get(k, "") for k in ["life_teaching", "dharma", "spiritual_path"]}
+    return {k: result.get(k, "") for k in ["dharma", "what_to_create", "growth_blocks"]}
 
 
 def soul_history_reading(
@@ -305,86 +331,53 @@ def soul_history_reading(
     moon_sign: str, moon_nakshatra: str,
     saturn_sign: str, saturn_house: int,
 ) -> dict:
-    """Returns {soul_knows, past_life_themes}"""
-    user = f"""For {name}'s Vedic birth chart, illuminate the soul's history — what it may already carry from previous lives.
+    """Returns {soul_themes: [{theme, description}]}"""
+    user = f"""For this Vedic birth chart, illuminate what the soul may already carry and know.
 
 Chart data:
-- Ketu (karmic past, what the soul has already mastered): {ketu_sign} house {ketu_house} · {ketu_nakshatra}
-- Moon (emotional memory, karmic residue): {moon_sign} · {moon_nakshatra}
-- Saturn (karmic debt and old structures): {saturn_sign} house {saturn_house}
+- Ketu (karmic past, what the soul has already mastered): {ketu_sign} house {ketu_house}, {ketu_nakshatra}
+- Moon (emotional memory, what feels innate): {moon_sign}, {moon_nakshatra}
+- Saturn (karmic weight, old structures): {saturn_sign} house {saturn_house}
 
 Return ONLY a JSON object with:
-- "soul_knows": 3-4 sentences (~90 words) on what this soul already knows deeply — the skills, capacities, and wisdom that feel innate, that arrived already formed, that don't need to be learned
-- "past_life_themes": 3-4 sentences (~90 words) on potential past life themes — the environments, roles, relationships, or inner battles the soul may carry imprints from (frame this as "may suggest" or "points toward", never as absolute fact)
+- "soul_themes": an array of 4 objects. Each object represents one area of deep knowing this soul carries. Each has:
+  - "theme": 3-5 words naming what this soul already knows (e.g. "The Art of Deep Solitude", "Ancient Healing Wisdom", "Mastery of Sacred Knowledge")
+  - "description": 2-3 sentences (~50 words) on what this soul knows deeply and how it shows up as an innate capacity or feeling of familiarity in this life. Frame as "may suggest" or "points toward", never as absolute fact.
+  - "past_life_labels": an array of 2-3 short strings (2-4 words each) naming possible past life archetypes or settings that could have built this knowing (e.g. ["Temple Keeper", "Medieval Healer"], ["Monastic Scholar", "Court Advisor"], ["Desert Mystic", "Tribal Elder"]). These are evocative and poetic, not literal.
 
-{{"soul_knows": "...", "past_life_themes": "..."}}"""
-    raw = _call(SYSTEM, user, max_tokens=750)
+{{"soul_themes": [{{"theme": "...", "description": "...", "past_life_labels": ["...", "..."]}}, ...]}}"""
+    raw = _call(SYSTEM, user, max_tokens=900)
     result = _extract_json(raw)
-    return {k: result.get(k, "") for k in ["soul_knows", "past_life_themes"]}
+    themes = result.get("soul_themes", [])
+    if not isinstance(themes, list):
+        themes = []
+    return {"soul_themes": [{"theme": t.get("theme", ""), "description": t.get("description", ""), "past_life_labels": t.get("past_life_labels", [])} for t in themes[:5] if isinstance(t, dict)]}
 
 
-def energy_reading(
-    name: str,
-    lagna_sign: str, lagna_nakshatra: str,
-    moon_sign: str, moon_nakshatra: str,
-    sun_sign: str,
+def love_reading(
+    lagna_sign: str,
+    seventh_house_sign: str,
+    venus_sign: str, venus_house: int, venus_nakshatra: str,
+    moon_sign: str, moon_house: int, moon_nakshatra: str,
     mars_sign: str, mars_house: int,
-    saturn_sign: str, saturn_house: int,
-    jupiter_sign: str, jupiter_house: int,
-    venus_sign: str,
-    elements: dict,
+    rahu_sign: str, rahu_house: int,
 ) -> dict:
-    """Returns {dominant_force, shiva_score, shakti_score, vishnu_score, shiva_explanation, shakti_explanation, vishnu_explanation, cultivate, practices}"""
-    elem_str = f"Fire: {elements.get('fire',0)}, Earth: {elements.get('earth',0)}, Air: {elements.get('air',0)}, Water: {elements.get('water',0)}"
-    user = f"""For {name}'s Vedic birth chart, assess their energetic constitution through the three divine forces.
+    """Returns {love_style, relationship_needs}"""
+    user = f"""For this Vedic birth chart, illuminate how this person loves and what they need in relationships.
 
-Chart:
-- Lagna: {lagna_sign} · {lagna_nakshatra}
-- Moon: {moon_sign} · {moon_nakshatra}
-- Sun: {sun_sign}
-- Mars: {mars_sign} house {mars_house}
-- Saturn: {saturn_sign} house {saturn_house}
-- Jupiter: {jupiter_sign} house {jupiter_house}
-- Venus: {venus_sign}
-- Elemental balance: {elem_str}
+Chart data:
+- Rising sign (lagna): {lagna_sign}
+- 7th house (partnerships and significant others): {seventh_house_sign}
+- Venus (how you love, what you find beautiful and worthy): {venus_sign} house {venus_house}, {venus_nakshatra}
+- Moon (emotional needs, attachment patterns, what makes you feel safe): {moon_sign} house {moon_house}, {moon_nakshatra}
+- Mars (desire, what you pursue, how you initiate): {mars_sign} house {mars_house}
+- Rahu (what the soul is hungry for in connection): {rahu_sign} house {rahu_house}
 
-The three forces:
-- Shiva: destroyer-transformer — penetrating insight, renunciation, fire, discipline, breaking illusions (Mars + Saturn + fire/air elements)
-- Shakti: creator-manifestor — creative power, desire, beauty, embodiment, abundance (Venus + Moon + water/earth elements)
-- Vishnu: preserver-sustainer — wisdom, grace, expansion, devotion, relationships (Jupiter + Sun + benefic placements)
+Return ONLY a JSON object with:
+- "love_style": 3-4 sentences (~90 words) on how this person naturally loves. Their way of expressing affection, connecting, and attaching. The texture of their love based on Venus and Moon placements. Be warm, specific, and recognizable.
+- "relationship_needs": 3-4 sentences (~90 words) on what they truly need in a relationship to feel safe, seen, and alive. What kind of presence, freedom, depth, or security their chart calls for. What types of connections bring out the best in them.
 
-Return ONLY a JSON object. The three scores MUST sum to exactly 100. Be specific about WHY based on the chart.
-{{
-  "dominant_force": "Shiva" or "Shakti" or "Vishnu",
-  "shiva_score": <integer>,
-  "shakti_score": <integer>,
-  "vishnu_score": <integer>,
-  "shiva_explanation": "1-2 sentences on why this score based on specific placements",
-  "shakti_explanation": "1-2 sentences on why this score based on specific placements",
-  "vishnu_explanation": "1-2 sentences on why this score based on specific placements",
-  "cultivate": "2-3 sentences on which force they need to cultivate more and why the chart shows an imbalance",
-  "practices": "2-3 sentences on specific practices — meditation, movement, creative work, devotion — that would keep them balanced given this chart"
-}}"""
-    raw = _call(SYSTEM, user, max_tokens=1000)
+{{"love_style": "...", "relationship_needs": "..."}}"""
+    raw = _call(SYSTEM, user, max_tokens=800)
     result = _extract_json(raw)
-
-    shiva = max(0, int(result.get("shiva_score", 34)))
-    shakti = max(0, int(result.get("shakti_score", 33)))
-    vishnu = max(0, int(result.get("vishnu_score", 33)))
-    total = shiva + shakti + vishnu
-    if total != 100 and total > 0:
-        shiva = round(shiva * 100 / total)
-        shakti = round(shakti * 100 / total)
-        vishnu = 100 - shiva - shakti
-
-    return {
-        "dominant_force": result.get("dominant_force", ""),
-        "shiva_score": shiva,
-        "shakti_score": shakti,
-        "vishnu_score": vishnu,
-        "shiva_explanation": result.get("shiva_explanation", ""),
-        "shakti_explanation": result.get("shakti_explanation", ""),
-        "vishnu_explanation": result.get("vishnu_explanation", ""),
-        "cultivate": result.get("cultivate", ""),
-        "practices": result.get("practices", ""),
-    }
+    return {k: result.get(k, "") for k in ["love_style", "relationship_needs"]}

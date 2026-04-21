@@ -22,8 +22,8 @@
   --clr-border-2:     rgba(255,255,255,0.06);
 
   /* ── Typography ── */
-  /* --font-display is injected by layout.tsx via next/font (Cormorant Garamond — readings prose) */
-  /* --font-sans    is injected by layout.tsx via next/font (Nunito Sans — UI shell)              */
+  /* --font-display and --font-sans both resolve to Nunito Sans (injected by layout.tsx) */
+  --font-display: var(--font-sans, "Nunito Sans", system-ui, sans-serif);
   --font-label: var(--font-sans, "Nunito Sans", system-ui, sans-serif);
 
   --text-display: clamp(56px, 8vw, 88px);
@@ -66,8 +66,65 @@
   /* ── Motion ── */
   --ease:          cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out:      cubic-bezier(0, 0, 0.2, 1);
+  --ease-entry:    cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast:      150ms;
   --dur-normal:    320ms;
   --dur-slow:      700ms;
   --dur-page:      1000ms;
+
+  /* ────────────────────────────────────────────
+     Naksha Design System v2
+     ──────────────────────────────────────────── */
+
+  /* Ground & surface */
+  --nk-ground:       #0B1220;
+  --nk-surface:      #111B2C;
+  --nk-surface-2:    #162238;
+  --nk-surface-deep: #070C16;
+
+  /* Text */
+  --nk-text:   #F5F7FB;
+  --nk-text-2: rgba(245,247,251,0.70);
+  --nk-text-3: rgba(245,247,251,0.45);
+  --nk-text-4: rgba(245,247,251,0.28);
+
+  /* Primary — cosmic blue */
+  --nk-primary:      #5B8CFF;
+  --nk-primary-hover:#7AA3FF;
+  --nk-primary-dim:  rgba(91,140,255,0.12);
+  --nk-primary-line: rgba(91,140,255,0.32);
+  --nk-primary-glow: 0 0 24px rgba(91,140,255,0.35);
+
+  /* Secondary accents */
+  --nk-gold:        #D4B896;
+  --nk-gold-dim:    rgba(212,184,150,0.12);
+  --nk-violet:      #B99CDF;
+  --nk-violet-dim:  rgba(185,156,223,0.12);
+
+  /* Semantic */
+  --nk-success: #7EC8A0;
+  --nk-warning: #F0B860;
+  --nk-danger:  #E06A6A;
+
+  /* Borders */
+  --nk-border:      rgba(255,255,255,0.08);
+  --nk-border-hover:rgba(255,255,255,0.14);
+  --nk-border-hair: rgba(255,255,255,0.04);
+
+  /* Shadows — inset hairline is the signature detail */
+  --nk-shadow-sm: 0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.04);
+  --nk-shadow-md: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  --nk-shadow-lg: 0 24px 64px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.05);
+
+  /* Type families — populated by next/font/google via layout.tsx */
+  --nk-font-display: 'Instrument Serif', Georgia, serif;
+  --nk-font-sans:    'Inter', ui-sans-serif, system-ui, sans-serif;
+  --nk-font-mono:    'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+  /* Radii */
+  --nk-r-xs:   2px;
+  --nk-r-sm:   8px;
+  --nk-r-md:   12px;
+  --nk-r-lg:   16px;
+  --nk-r-pill: 999px;
 }

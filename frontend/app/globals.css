@@ -11,8 +11,8 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--clr-bg);
-  color: var(--clr-text);
+  background: var(--nk-ground);
+  color: var(--nk-text);
   font-family: var(--font-sans, 'Nunito Sans', system-ui, sans-serif);
   font-size: var(--text-body);
   line-height: var(--leading-normal);
@@ -54,12 +54,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   color: var(--clr-text-2);
 }
 
-.label--accent { color: var(--clr-accent); }
+.label--accent { color: var(--nk-primary); }
 
 /* ── Card ── */
 .card {
   background: var(--clr-bg-raised);
-  border: 1px solid var(--clr-border);
+  border: 1px solid var(--nk-border);
   border-radius: var(--radius-lg);
   padding: var(--sp-10);
 }
@@ -72,11 +72,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .divider {
   width: 100%;
   height: 1px;
-  background: var(--clr-border);
+  background: var(--nk-border);
 }
 
 .divider--fade {
-  background: linear-gradient(90deg, transparent, var(--clr-border), transparent);
+  background: linear-gradient(90deg, transparent, var(--nk-border), transparent);
 }
 
 /* ── Page fade ── */
@@ -96,7 +96,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--clr-bg);
+  background: var(--nk-ground);
 }
 
 .app-sidebar {
@@ -117,8 +117,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   z-index: 40;
   height: 64px;
   padding-bottom: env(safe-area-inset-bottom);
-  background: rgba(50,63,72,0.97);
-  border-top: 1px solid var(--clr-border);
+  background: rgba(7,12,22,0.97);
+  border-top: 1px solid var(--nk-border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
@@ -128,9 +128,10 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 /* Desktop: sidebar layout */
 @media (min-width: 768px) {
   .app-shell { flex-direction: row; }
-  .app-sidebar { display: flex; flex-direction: column; width: 220px; flex-shrink: 0; min-height: 100vh; min-height: 100dvh; border-right: 1px solid var(--clr-border); padding: 32px 0; position: sticky; top: 0; height: 100vh; }
-  .app-content { padding-bottom: 0; max-width: 720px; }
+  .app-sidebar { display: flex; flex-direction: column; width: 220px; flex-shrink: 0; min-height: 100vh; min-height: 100dvh; border-right: 1px solid var(--nk-border); padding: 32px 0; position: sticky; top: 0; height: 100vh; }
+  .app-content { padding-bottom: 0; flex: 1; min-width: 0; }
   .bottom-nav { display: none; }
+  .chat-input-bar { left: 220px !important; }
 }
 
 /* ── Section headers ── */
@@ -139,7 +140,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--clr-accent);
+  color: var(--nk-primary);
   opacity: 0.85;
 }
 

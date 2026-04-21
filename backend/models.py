@@ -134,12 +134,16 @@ class KarmicAxis(BaseModel):
     axis_name: str
 
 
+class StandoutItem(BaseModel):
+    headline: str
+    body: str
+    tag: str
+
+
 class CoreReading(BaseModel):
     who_are_you: str
-    what_stands_out: str
-    how_you_come_across: str
-    inner_world: str
-    what_drives_you: str
+    what_stands_out: List[StandoutItem]
+    presence_and_inner_world: str
 
 
 class Archetype(BaseModel):
@@ -153,26 +157,24 @@ class NaturalPowers(BaseModel):
 
 
 class GrowthPath(BaseModel):
-    life_teaching: str
     dharma: str
-    spiritual_path: str
+    what_to_create: str
+    growth_blocks: str
+
+
+class SoulTheme(BaseModel):
+    theme: str
+    description: str
+    past_life_labels: List[str] = []
 
 
 class SoulHistory(BaseModel):
-    soul_knows: str
-    past_life_themes: str
+    soul_themes: List[SoulTheme]
 
 
-class EnergyReading(BaseModel):
-    dominant_force: str
-    shiva_score: int
-    shakti_score: int
-    vishnu_score: int
-    shiva_explanation: str
-    shakti_explanation: str
-    vishnu_explanation: str
-    cultivate: str
-    practices: str
+class LoveReading(BaseModel):
+    love_style: str
+    relationship_needs: str
 
 
 class Readings(BaseModel):
@@ -187,7 +189,7 @@ class Readings(BaseModel):
     natural_powers: Optional[NaturalPowers] = None
     growth_path: Optional[GrowthPath] = None
     soul_history: Optional[SoulHistory] = None
-    energy: Optional[EnergyReading] = None
+    love: Optional[LoveReading] = None
 
 
 class ChartMeta(BaseModel):

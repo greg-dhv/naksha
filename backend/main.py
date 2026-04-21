@@ -11,7 +11,8 @@ from models import (
     Panchanga, DetectedYoga,
     DashaData, MahadashaPeriod, AntarPeriodFull, PratyantarPeriod,
     Readings, ChartMeta, ThreePillars, KarmicAxis,
-    CoreReading, NaturalPowers, Archetype, GrowthPath, SoulHistory, EnergyReading,
+    StandoutItem, CoreReading, NaturalPowers, Archetype,
+    GrowthPath, SoulTheme, SoulHistory, LoveReading,
 )
 from calculations import calculate_chart, calculate_dasha, NAKSHATRA_LORDS
 from geocoding import geocode
@@ -26,8 +27,10 @@ from ai_service import (
     natural_powers_reading,
     growth_path_reading,
     soul_history_reading,
-    energy_reading,
+    love_reading,
 )
+
+from routers import auth as auth_router, users as users_router, chat as chat_router, bonds as bonds_router, home as home_router
 
 load_dotenv()
 
@@ -43,10 +46,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router.router, prefix="/api")
+app.include_router(users_router.router, prefix="/api")
+app.include_router(chat_router.router, prefix="/api")
+app.include_router(bonds_router.router, prefix="/api")
+app.include_router(home_router.router, prefix="/api")
+
 FIRE_SIGNS  = {'Aries', 'Leo', 'Sagittarius'}
 EARTH_SIGNS = {'Taurus', 'Virgo', 'Capricorn'}
 AIR_SIGNS   = {'Gemini', 'Libra', 'Aquarius'}
 WATER_SIGNS = {'Cancer', 'Scorpio', 'Pisces'}
+
+SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+         'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
 
 
 def _element_balance(planets_raw: dict) -> dict:
@@ -132,6 +144,12 @@ def generate_chart(req: ChartRequest):
     venus   = planets_raw.get("Venus", {})
 
     elements = _element_balance(planets_raw)
+
+    seventh_house_sign = SIGNS[(lagna["sign_index"] + 6) % 12]
+    tenth_house_sign   = SIGNS[(lagna["sign_index"] + 9) % 12]
+    debilitated_str    = ", ".join(
+        name for name, p in planets_raw.items() if p.get("dignity") == "debilitated"
+    ) or "none"
 
     planet_list = [
         {
@@ -224,6 +242,8 @@ def generate_chart(req: ChartRequest):
             rahu.get("sign", ""), rahu.get("house", 0), rahu.get("nakshatra", ""),
             saturn.get("sign", ""), saturn.get("house", 0),
             jupiter.get("sign", ""), jupiter.get("house", 0),
+            tenth_house_sign,
+            debilitated_str,
             maha["planet"] if maha else "unknown",
             fallback={})
 
@@ -234,16 +254,13 @@ def generate_chart(req: ChartRequest):
             saturn.get("sign", ""), saturn.get("house", 0),
             fallback={})
 
-        f_energy = ex.submit(safe_dict, energy_reading,
-            req.name,
-            lagna["sign"], lagna["nakshatra"],
-            moon["sign"], moon["nakshatra"],
-            sun["sign"],
+        f_love = ex.submit(safe_dict, love_reading,
+            lagna["sign"],
+            seventh_house_sign,
+            venus.get("sign", ""), venus.get("house", 0), venus.get("nakshatra", ""),
+            moon["sign"], moon["house"], moon["nakshatra"],
             mars.get("sign", ""), mars.get("house", 0),
-            saturn.get("sign", ""), saturn.get("house", 0),
-            jupiter.get("sign", ""), jupiter.get("house", 0),
-            venus.get("sign", ""),
-            elements,
+            rahu.get("sign", ""), rahu.get("house", 0),
             fallback={})
 
         nakshatra_text = f_nakshatra.result()
@@ -256,14 +273,28 @@ def generate_chart(req: ChartRequest):
         powers_raw     = f_powers.result()
         growth_raw     = f_growth.result()
         soul_raw       = f_soul.result()
-        energy_raw     = f_energy.result()
+        love_raw       = f_love.result()
 
     # Build optional reading objects (None if AI call returned empty)
     def _core_obj(r):
-        keys = ["who_are_you", "what_stands_out", "how_you_come_across", "inner_world", "what_drives_you"]
-        if not r or not any(r.get(k) for k in keys):
+        if not r or not r.get("who_are_you"):
             return None
-        return CoreReading(**{k: r.get(k, "") for k in keys})
+        standout_raw = r.get("what_stands_out", [])
+        if not isinstance(standout_raw, list):
+            standout_raw = []
+        standout_items = [
+            StandoutItem(
+                headline=s.get("headline", ""),
+                body=s.get("body", ""),
+                tag=s.get("tag", ""),
+            )
+            for s in standout_raw if isinstance(s, dict)
+        ]
+        return CoreReading(
+            who_are_you=r.get("who_are_you", ""),
+            what_stands_out=standout_items,
+            presence_and_inner_world=r.get("presence_and_inner_world", ""),
+        )
 
     def _powers_obj(r):
         if not r or not r.get("gifts"):
@@ -272,22 +303,32 @@ def generate_chart(req: ChartRequest):
         return NaturalPowers(gifts=r.get("gifts", ""), archetypes=archetypes)
 
     def _growth_obj(r):
-        keys = ["life_teaching", "dharma", "spiritual_path"]
+        keys = ["dharma", "what_to_create", "growth_blocks"]
         if not r or not any(r.get(k) for k in keys):
             return None
         return GrowthPath(**{k: r.get(k, "") for k in keys})
 
     def _soul_obj(r):
-        if not r or not any(r.get(k) for k in ["soul_knows", "past_life_themes"]):
+        themes_raw = r.get("soul_themes", []) if r else []
+        if not themes_raw or not isinstance(themes_raw, list):
             return None
-        return SoulHistory(soul_knows=r.get("soul_knows", ""), past_life_themes=r.get("past_life_themes", ""))
+        themes = [
+            SoulTheme(
+                theme=t.get("theme", ""),
+                description=t.get("description", ""),
+                past_life_labels=[l for l in t.get("past_life_labels", []) if isinstance(l, str)],
+            )
+            for t in themes_raw if isinstance(t, dict)
+        ]
+        return SoulHistory(soul_themes=themes) if themes else None
 
-    def _energy_obj(r):
-        keys = ["dominant_force", "shiva_score", "shakti_score", "vishnu_score",
-                "shiva_explanation", "shakti_explanation", "vishnu_explanation", "cultivate", "practices"]
-        if not r or not r.get("dominant_force"):
+    def _love_obj(r):
+        if not r or not r.get("love_style"):
             return None
-        return EnergyReading(**{k: r.get(k, "" if isinstance("", str) else 0) for k in keys})
+        return LoveReading(
+            love_style=r.get("love_style", ""),
+            relationship_needs=r.get("relationship_needs", ""),
+        )
 
     return ChartResponse(
         chart=ChartData(
@@ -316,7 +357,7 @@ def generate_chart(req: ChartRequest):
             natural_powers=_powers_obj(powers_raw),
             growth_path=_growth_obj(growth_raw),
             soul_history=_soul_obj(soul_raw),
-            energy=_energy_obj(energy_raw),
+            love=_love_obj(love_raw),
         ),
         meta=ChartMeta(
             name=req.name,

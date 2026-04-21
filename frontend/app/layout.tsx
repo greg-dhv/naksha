@@ -1,14 +1,7 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, Nunito_Sans } from 'next/font/google'
+import { Nunito_Sans } from 'next/font/google'
 import './globals.css'
-
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-display',
-  display: 'swap',
-})
+import Providers from '@/components/Providers'
 
 const nunitoSans = Nunito_Sans({
   subsets: ['latin'],
@@ -29,8 +22,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${nunitoSans.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={nunitoSans.variable}>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   )
 }
