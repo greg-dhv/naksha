@@ -219,8 +219,8 @@ def generate_chart(req: ChartRequest):
             lagna["sign"], lagna["nakshatra"], lagna["pada"],
             moon["sign"], moon["nakshatra"], moon["house"],
             sun["sign"], sun["house"], sun["nakshatra"],
-            saturn.get("sign", ""), saturn.get("house", 0),
-            mars.get("sign", ""), mars.get("house", 0),
+            chart_raw["planets"],
+            chart_raw["yogas"],
             maha["planet"] if maha else "unknown",
             fallback={})
 

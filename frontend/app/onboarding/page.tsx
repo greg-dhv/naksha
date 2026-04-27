@@ -7,6 +7,17 @@ import { GeocodeResult } from '@/lib/types'
 type Step = 'name' | 'date' | 'time' | 'location'
 const STEPS: Step[] = ['name', 'date', 'time', 'location']
 
+const LOADING_PHASES = [
+  { label: 'Nakshatra', text: 'Fixing your birth star…' },
+  { label: 'Moon', text: 'Reading your lunar mind…' },
+  { label: 'Ascendant', text: 'Calculating your rising sign…' },
+  { label: 'The Nine Grahas', text: 'Mapping all planetary positions…' },
+  { label: 'Dasha', text: 'Tracing your life seasons…' },
+  { label: 'Rahu & Ketu', text: 'Reading your karmic axis…' },
+  { label: 'Yogas', text: 'Detecting planetary combinations…' },
+  { label: 'Your Essence', text: 'Weaving it all into your map…' },
+]
+
 interface FormData {
   name: string
   birth_date: string
@@ -25,6 +36,8 @@ export default function OnboardingPage() {
   const [locationResults, setLocationResults] = useState<GeocodeResult[]>([])
   const [searching, setSearching] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loadingPhase, setLoadingPhase] = useState(0)
+  const [phaseVisible, setPhaseVisible] = useState(true)
   const [error, setError] = useState('')
   const [visible, setVisible] = useState(false)
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -35,6 +48,19 @@ export default function OnboardingPage() {
     const t = setTimeout(() => { setVisible(true); inputRef.current?.focus() }, 80)
     return () => clearTimeout(t)
   }, [step])
+
+  useEffect(() => {
+    if (!loading) { setLoadingPhase(0); setPhaseVisible(true); return }
+    const cycle = setInterval(() => {
+      setPhaseVisible(false)
+      const t = setTimeout(() => {
+        setLoadingPhase(p => (p + 1) % LOADING_PHASES.length)
+        setPhaseVisible(true)
+      }, 350)
+      return () => clearTimeout(t)
+    }, 1600)
+    return () => clearInterval(cycle)
+  }, [loading])
 
   const stepIndex = STEPS.indexOf(step)
 
@@ -91,6 +117,139 @@ export default function OnboardingPage() {
       setLoading(false)
     }
   }
+
+  if (loading) return (
+    <>
+      <style>{`
+        @keyframes nk-spin-cw  { to { transform: rotate(360deg) } }
+        @keyframes nk-spin-ccw { to { transform: rotate(-360deg) } }
+        @keyframes nk-orb-pulse {
+          0%, 100% { opacity: 0.55; }
+          50%       { opacity: 1; }
+        }
+        @keyframes nk-loader-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes nk-phase-in {
+          from { opacity: 0; transform: translateY(7px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .nk-phase-enter { animation: nk-phase-in 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+      `}</style>
+      <main style={{
+        minHeight: '100vh',
+        background: 'var(--nk-ground)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '24px',
+        animation: 'nk-loader-in 0.6s ease both',
+      }}>
+        {/* Orbital mandala */}
+        <svg width="220" height="220" viewBox="0 0 220 220" style={{ overflow: 'visible' }}>
+          <defs>
+            <radialGradient id="nk-orb-core" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"   stopColor="rgba(255,255,255,0.95)" />
+              <stop offset="45%"  stopColor="rgba(91,140,255,0.65)" />
+              <stop offset="100%" stopColor="rgba(91,140,255,0)" />
+            </radialGradient>
+            <radialGradient id="nk-orb-halo" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"   stopColor="rgba(91,140,255,0.18)" />
+              <stop offset="100%" stopColor="rgba(91,140,255,0)" />
+            </radialGradient>
+          </defs>
+
+          {/* Static guide rings */}
+          <circle cx="110" cy="110" r="103" fill="none" stroke="rgba(91,140,255,0.07)" strokeWidth="1" />
+          <circle cx="110" cy="110" r="70"  fill="none" stroke="rgba(91,140,255,0.11)" strokeWidth="1" />
+
+          {/* Inner dashed ring — slow CW */}
+          <circle
+            cx="110" cy="110" r="44"
+            fill="none" stroke="rgba(91,140,255,0.32)" strokeWidth="1"
+            strokeDasharray="3 7"
+            style={{ animation: 'nk-spin-cw 12s linear infinite', transformOrigin: '110px 110px' }}
+          />
+
+          {/* 27 nakshatra dots — slow CW */}
+          <g style={{ animation: 'nk-spin-cw 50s linear infinite', transformOrigin: '110px 110px' }}>
+            {Array.from({ length: 27 }, (_, i) => {
+              const angle = (i / 27) * 2 * Math.PI - Math.PI / 2
+              const x = 110 + 103 * Math.cos(angle)
+              const y = 110 + 103 * Math.sin(angle)
+              const major = i % 9 === 0
+              const mid   = i % 3 === 0
+              return (
+                <circle
+                  key={i} cx={x} cy={y}
+                  r={major ? 2.5 : mid ? 1.5 : 1}
+                  fill={`rgba(91,140,255,${major ? 0.95 : mid ? 0.5 : 0.2})`}
+                />
+              )
+            })}
+          </g>
+
+          {/* 9 planet dots — CCW */}
+          <g style={{ animation: 'nk-spin-ccw 20s linear infinite', transformOrigin: '110px 110px' }}>
+            {Array.from({ length: 9 }, (_, i) => {
+              const angle = (i / 9) * 2 * Math.PI - Math.PI / 2
+              const x = 110 + 70 * Math.cos(angle)
+              const y = 110 + 70 * Math.sin(angle)
+              return (
+                <g key={i}>
+                  <circle cx={x} cy={y} r={9}   fill="rgba(212,184,150,0.07)" />
+                  <circle cx={x} cy={y} r={3.5}  fill="rgba(212,184,150,0.9)" />
+                </g>
+              )
+            })}
+          </g>
+
+          {/* Center halo + orb */}
+          <circle
+            cx="110" cy="110" r="32"
+            fill="url(#nk-orb-halo)"
+            style={{ animation: 'nk-orb-pulse 3s ease-in-out infinite' }}
+          />
+          <circle
+            cx="110" cy="110" r="13"
+            fill="url(#nk-orb-core)"
+            style={{ animation: 'nk-orb-pulse 3s ease-in-out infinite' }}
+          />
+        </svg>
+
+        {/* Phase text */}
+        <div style={{ marginTop: '52px', textAlign: 'center', minHeight: '70px' }}>
+          <p style={{
+            fontFamily: 'var(--font-sans)', fontSize: '10px',
+            letterSpacing: '0.28em', textTransform: 'uppercase',
+            color: 'var(--nk-primary)', opacity: 0.65,
+            marginBottom: '18px',
+          }}>
+            Mapping your Naksha
+          </p>
+          {phaseVisible && (
+            <div className="nk-phase-enter">
+              <p style={{
+                fontFamily: 'var(--font-sans)', fontSize: '10px',
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                color: 'rgba(212,184,150,0.55)',
+                marginBottom: '8px',
+              }}>
+                {LOADING_PHASES[loadingPhase].label}
+              </p>
+              <p style={{
+                fontFamily: 'var(--font-sans)', fontSize: '16px',
+                fontWeight: 300, letterSpacing: '0.01em',
+                color: 'rgba(245,247,251,0.42)',
+              }}>
+                {LOADING_PHASES[loadingPhase].text}
+              </p>
+            </div>
+          )}
+        </div>
+      </main>
+    </>
+  )
 
   const writtenDate = form.birth_date
     ? new Date(form.birth_date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })

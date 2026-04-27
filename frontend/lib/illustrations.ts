@@ -62,7 +62,11 @@ const YOGA_META: Record<string, { slug: string; color: string }> = {
   'Sarasvati':                 { slug: 'sarasvati',           color: '#D4B896' },
   'Sarasvati (with Moon)':     { slug: 'sarasvati-moon',      color: '#D4B896' },
   'Parivartana':               { slug: 'parivartana',         color: '#5B8CFF' },
+  'Parivartana Yoga':          { slug: 'parivartana',         color: '#5B8CFF' },
   'Neecha Bhanga Raja':        { slug: 'neecha-bhanga',       color: '#D4B896' },
+  'Neecha Bhanga Raja Yoga':   { slug: 'neecha-bhanga',       color: '#D4B896' },
+  'Raj Yoga':                  { slug: 'raja-generic',        color: '#D4B896' },
+  'Adhi Yoga':                 { slug: 'adhi',                color: '#B99CDF' },
   'Kemadruma Bhanga':          { slug: 'kemadruma-bhanga',    color: '#D4B896' },
   'Vipreet (redemption)':      { slug: 'vipreet-redemption',  color: '#D4B896' },
 }

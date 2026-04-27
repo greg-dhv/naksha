@@ -109,7 +109,7 @@ export interface KarmicAxis {
 export interface StandoutItem {
   headline: string
   body: string
-  tag: string
+  tag: string  // planet name (e.g. "Jupiter", "Saturn", "Rahu") — used to highlight chart cell
 }
 
 export interface CoreReading {

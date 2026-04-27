@@ -77,6 +77,15 @@ COMBUST_ORBS = {
     'Mars': 17, 'Jupiter': 11, 'Saturn': 15,
 }
 
+# Sign lordship (used for house lord calculation and yoga detection)
+SIGN_LORDS = {
+    0: 'Mars', 1: 'Venus', 2: 'Mercury', 3: 'Moon', 4: 'Sun', 5: 'Mercury',
+    6: 'Venus', 7: 'Mars', 8: 'Jupiter', 9: 'Saturn', 10: 'Saturn', 11: 'Jupiter',
+}
+
+# Which planet is exalted in each sign (excludes Rahu/Ketu)
+EXALTED_IN_SIGN = {sign: planet for planet, sign in EXALTATION_SIGN.items() if planet not in ('Rahu', 'Ketu')}
+
 # Panchanga tables
 TITHIS = [
     'Shukla Pratipada', 'Shukla Dwitiya', 'Shukla Tritiya', 'Shukla Chaturthi',
@@ -165,8 +174,12 @@ def _birth_jd(birth_date: date, birth_time: str, lat: float, lon: float) -> floa
 def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
     yogas = []
     KENDRAS = {1, 4, 7, 10}
+    TRIKONAS = {1, 5, 9}
 
-    # Pancha Mahapurusha Yogas: functional graha in own/exalt/moolatrikona in kendra
+    def house_lord(house_num: int) -> str:
+        return SIGN_LORDS[(lagna_sign_index + house_num - 1) % 12]
+
+    # --- 1. Pancha Mahapurusha (priority 1) ---
     MAHA = {
         'Mars': ('Ruchaka', 'Pancha Mahapurusha'),
         'Mercury': ('Bhadra', 'Pancha Mahapurusha'),
@@ -178,15 +191,81 @@ def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
         p = planets.get(planet)
         if not p:
             continue
-        h = p['house']
-        dignity = p.get('dignity', '')
-        if h in KENDRAS and dignity in ('exalted', 'own', 'moolatrikona'):
+        if p['house'] in KENDRAS and p.get('dignity', '') in ('exalted', 'own', 'moolatrikona'):
             yogas.append({
                 'name': yoga_name,
                 'type': yoga_type,
                 'planets': [planet],
-                'houses': [h],
-                'description': f'{planet} {dignity} in kendra (house {h})',
+                'houses': [p['house']],
+                'description': f'{planet} {p["dignity"]} in kendra (house {p["house"]})',
+                'priority': 1,
+            })
+
+    # --- 2. Raj Yoga: kendra lord + trikona lord conjunct or in mutual exchange (priority 2) ---
+    kendra_lords = {house_lord(h) for h in KENDRAS}
+    trikona_lords = {house_lord(h) for h in TRIKONAS}
+    raj_pairs_seen: set = set()
+    exchange_pairs_for_raj: set = set()
+
+    for k_lord in kendra_lords:
+        for t_lord in trikona_lords:
+            if k_lord == t_lord:
+                continue
+            pair = frozenset([k_lord, t_lord])
+            if pair in raj_pairs_seen:
+                continue
+            k_p = planets.get(k_lord)
+            t_p = planets.get(t_lord)
+            if not k_p or not t_p:
+                continue
+            k_h = next((h for h in KENDRAS if house_lord(h) == k_lord), '?')
+            t_h = next((h for h in TRIKONAS if house_lord(h) == t_lord), '?')
+
+            if k_p['house'] == t_p['house']:
+                raj_pairs_seen.add(pair)
+                yogas.append({
+                    'name': 'Raj Yoga',
+                    'type': 'Raj Yoga',
+                    'planets': [k_lord, t_lord],
+                    'houses': [k_p['house']],
+                    'description': f'{k_lord} (H{k_h} lord) and {t_lord} (H{t_h} lord) conjunct in H{k_p["house"]}',
+                    'priority': 2,
+                })
+            elif SIGN_LORDS.get(k_p['sign_index']) == t_lord and SIGN_LORDS.get(t_p['sign_index']) == k_lord:
+                raj_pairs_seen.add(pair)
+                exchange_pairs_for_raj.add(pair)
+                yogas.append({
+                    'name': 'Raj Yoga',
+                    'type': 'Raj Yoga',
+                    'planets': [k_lord, t_lord],
+                    'houses': [k_p['house'], t_p['house']],
+                    'description': f'{k_lord} (H{k_h} lord) and {t_lord} (H{t_h} lord) in mutual exchange',
+                    'priority': 2,
+                })
+
+    # --- 3. Neecha Bhanga Raja Yoga: debilitation cancelled by kendra placement (priority 3) ---
+    for planet_name in ('Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'):
+        p = planets.get(planet_name)
+        if not p or p.get('dignity') != 'debilitated':
+            continue
+        deb_sign = DEBILITATION_SIGN[planet_name]
+        cancellation = False
+        # Condition 1: lord of the debilitation sign is in a kendra from lagna
+        deb_lord_p = planets.get(SIGN_LORDS[deb_sign])
+        if deb_lord_p and deb_lord_p['house'] in KENDRAS:
+            cancellation = True
+        # Condition 2: the planet exalted in that sign is in a kendra from lagna
+        exalted_p = planets.get(EXALTED_IN_SIGN.get(deb_sign, ''))
+        if exalted_p and exalted_p['house'] in KENDRAS:
+            cancellation = True
+        if cancellation:
+            yogas.append({
+                'name': 'Neecha Bhanga Raja Yoga',
+                'type': 'Raj Yoga',
+                'planets': [planet_name],
+                'houses': [p['house']],
+                'description': f'{planet_name} debilitation cancelled — strength through reversal',
+                'priority': 3,
             })
 
     moon = planets.get('Moon')
@@ -194,8 +273,9 @@ def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
     sun = planets.get('Sun')
     mercury = planets.get('Mercury')
     mars = planets.get('Mars')
+    venus = planets.get('Venus')
 
-    # Gajakesari: Jupiter in kendra from Moon
+    # --- 4. Gajakesari: Jupiter in kendra from Moon (priority 4) ---
     if moon and jupiter:
         jup_from_moon = (jupiter['sign_index'] - moon['sign_index']) % 12 + 1
         if jup_from_moon in KENDRAS:
@@ -205,9 +285,31 @@ def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
                 'planets': ['Jupiter', 'Moon'],
                 'houses': [moon['house'], jupiter['house']],
                 'description': f'Jupiter in house {jup_from_moon} from Moon',
+                'priority': 4,
             })
 
-    # Budha-Aditya: Sun and Mercury conjunct
+    # --- 5. Parivartana Yoga: mutual sign exchange, not already counted as Raj Yoga (priority 5) ---
+    physical = [n for n in ('Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn') if n in planets]
+    parivartana_seen: set = set()
+    for i, p1_name in enumerate(physical):
+        for p2_name in physical[i + 1:]:
+            pair = frozenset([p1_name, p2_name])
+            if pair in exchange_pairs_for_raj or pair in parivartana_seen:
+                continue
+            p1 = planets[p1_name]
+            p2 = planets[p2_name]
+            if SIGN_LORDS.get(p1['sign_index']) == p2_name and SIGN_LORDS.get(p2['sign_index']) == p1_name:
+                parivartana_seen.add(pair)
+                yogas.append({
+                    'name': 'Parivartana Yoga',
+                    'type': 'Exchange',
+                    'planets': [p1_name, p2_name],
+                    'houses': [p1['house'], p2['house']],
+                    'description': f'{p1_name} and {p2_name} in mutual sign exchange',
+                    'priority': 5,
+                })
+
+    # --- 6. Budha-Aditya: Sun and Mercury conjunct (priority 5) ---
     if sun and mercury and sun['house'] == mercury['house']:
         yogas.append({
             'name': 'Budha-Aditya',
@@ -215,9 +317,10 @@ def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
             'planets': ['Sun', 'Mercury'],
             'houses': [sun['house']],
             'description': f'Sun and Mercury conjunct in house {sun["house"]}',
+            'priority': 5,
         })
 
-    # Chandra-Mangala: Moon and Mars conjunct
+    # --- 7. Chandra-Mangala: Moon and Mars conjunct (priority 5) ---
     if moon and mars and moon['house'] == mars['house']:
         yogas.append({
             'name': 'Chandra-Mangala',
@@ -225,26 +328,57 @@ def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
             'planets': ['Moon', 'Mars'],
             'houses': [moon['house']],
             'description': f'Moon and Mars conjunct in house {moon["house"]}',
+            'priority': 5,
         })
 
-    # Kemadruma: no graha in 2nd or 12th from Moon (Sun, Rahu, Ketu excluded)
+    # --- 8. Adhi Yoga: 2+ of Mercury/Jupiter/Venus in 6th–8th from Moon (priority 5) ---
     if moon:
         moon_si = moon['sign_index']
-        adj = {(moon_si + 1) % 12, (moon_si - 1) % 12}
-        adjacent = [
-            n for n, p in planets.items()
-            if n not in ('Moon', 'Sun', 'Rahu', 'Ketu') and p['sign_index'] in adj
+        benefics_in_678 = [
+            n for n in ('Mercury', 'Jupiter', 'Venus')
+            if planets.get(n) and (planets[n]['sign_index'] - moon_si) % 12 + 1 in {6, 7, 8}
         ]
-        if not adjacent:
+        if len(benefics_in_678) >= 2:
             yogas.append({
-                'name': 'Kemadruma',
-                'type': 'Affliction',
-                'planets': ['Moon'],
-                'houses': [moon['house']],
-                'description': 'No planets in 2nd or 12th from Moon',
+                'name': 'Adhi Yoga',
+                'type': 'Benefic',
+                'planets': benefics_in_678,
+                'houses': [planets[n]['house'] for n in benefics_in_678],
+                'description': f'{", ".join(benefics_in_678)} in 6th–8th from Moon',
+                'priority': 5,
             })
 
-    # Vesi / Vasi: planets in 2nd / 12th from Sun
+    # --- 9. Sunapha: planets in 2nd from Moon (priority 6) ---
+    if moon:
+        moon_si = moon['sign_index']
+        excluded = {'Moon', 'Sun', 'Rahu', 'Ketu'}
+        sunapha = [n for n, p in planets.items() if n not in excluded and p['sign_index'] == (moon_si + 1) % 12]
+        if sunapha:
+            yogas.append({
+                'name': 'Sunapha',
+                'type': 'Moon Yoga',
+                'planets': ['Moon'] + sunapha,
+                'houses': [moon['house']] + [planets[n]['house'] for n in sunapha],
+                'description': f'{", ".join(sunapha)} in 2nd from Moon',
+                'priority': 6,
+            })
+
+    # --- 10. Anapha: planets in 12th from Moon (priority 6) ---
+    if moon:
+        moon_si = moon['sign_index']
+        excluded = {'Moon', 'Sun', 'Rahu', 'Ketu'}
+        anapha = [n for n, p in planets.items() if n not in excluded and p['sign_index'] == (moon_si - 1) % 12]
+        if anapha:
+            yogas.append({
+                'name': 'Anapha',
+                'type': 'Moon Yoga',
+                'planets': ['Moon'] + anapha,
+                'houses': [moon['house']] + [planets[n]['house'] for n in anapha],
+                'description': f'{", ".join(anapha)} in 12th from Moon',
+                'priority': 6,
+            })
+
+    # --- 11. Vesi / Vasi: planets in 2nd / 12th from Sun (priority 7) ---
     if sun:
         sun_si = sun['sign_index']
         excluded = ('Sun', 'Moon', 'Rahu', 'Ketu')
@@ -257,6 +391,7 @@ def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
                 'planets': ['Sun'] + vesi,
                 'houses': [sun['house']] + [planets[n]['house'] for n in vesi],
                 'description': f'{", ".join(vesi)} in 2nd from Sun',
+                'priority': 7,
             })
         if vasi:
             yogas.append({
@@ -265,9 +400,27 @@ def _detect_yogas(planets: dict, lagna_sign_index: int) -> list:
                 'planets': ['Sun'] + vasi,
                 'houses': [sun['house']] + [planets[n]['house'] for n in vasi],
                 'description': f'{", ".join(vasi)} in 12th from Sun',
+                'priority': 7,
             })
 
-    return yogas
+    # --- 12. Kemadruma: no planets in 2nd or 12th from Moon (priority 8 — affliction, lowest) ---
+    if moon:
+        moon_si = moon['sign_index']
+        adj = {(moon_si + 1) % 12, (moon_si - 1) % 12}
+        adjacent = [n for n, p in planets.items() if n not in ('Moon', 'Sun', 'Rahu', 'Ketu') and p['sign_index'] in adj]
+        if not adjacent:
+            yogas.append({
+                'name': 'Kemadruma',
+                'type': 'Affliction',
+                'planets': ['Moon'],
+                'houses': [moon['house']],
+                'description': 'No planets in 2nd or 12th from Moon',
+                'priority': 8,
+            })
+
+    # Sort by priority (most significant first), cap at 6
+    yogas.sort(key=lambda y: y.get('priority', 9))
+    return yogas[:6]
 
 
 def _calculate_panchanga(jd: float, sun_lon: float, moon_lon: float) -> dict:

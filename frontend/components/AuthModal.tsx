@@ -11,6 +11,7 @@ export default function AuthModal() {
   const [username, setUsername] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -21,10 +22,8 @@ export default function AuthModal() {
         ? await register(email, password, username)
         : await login(email, password)
 
-      // Close the modal immediately — don't block on chart save
       setAuth(result.token, result.user)
 
-      // On register only: auto-save any chart from localStorage in the background
       if (tab === 'register') {
         const stored = localStorage.getItem('naksha_chart')
         if (stored) {
@@ -47,62 +46,91 @@ export default function AuthModal() {
     }
   }
 
-  const inputStyle: React.CSSProperties = {
+  const inputStyle = (field: string): React.CSSProperties => ({
     width: '100%',
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: '8px',
-    padding: '12px 14px',
-    color: '#fff',
+    background: focusedField === field ? 'rgba(91,140,255,0.06)' : 'var(--nk-surface-2)',
+    border: `1px solid ${focusedField === field ? 'rgba(91,140,255,0.4)' : 'var(--nk-border)'}`,
+    borderRadius: 'var(--nk-r-md)',
+    padding: '14px 16px',
+    color: 'var(--nk-text)',
     fontSize: '15px',
-    fontFamily: 'var(--font-sans)',
+    fontFamily: 'var(--nk-font-sans)',
     outline: 'none',
-  }
+    transition: 'border-color 150ms ease, background 150ms ease',
+    boxShadow: focusedField === field ? '0 0 0 3px rgba(91,140,255,0.10)' : 'none',
+  })
 
   return (
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 200,
-        background: 'rgba(12,20,28,0.88)',
-        backdropFilter: 'blur(16px)',
+        background: 'rgba(7,12,22,0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '24px',
       }}
       onClick={e => { if (e.target === e.currentTarget) closeAuthModal() }}
     >
       <div style={{
-        background: 'var(--clr-bg-deep)',
-        border: '1px solid var(--clr-border)',
-        borderRadius: '16px',
-        padding: '40px 36px',
+        background: 'var(--nk-surface)',
+        border: '1px solid var(--nk-border)',
+        borderRadius: 'var(--nk-r-lg)',
+        padding: '36px 32px 32px',
         width: '100%',
         maxWidth: '400px',
+        boxShadow: 'var(--nk-shadow-lg)',
       }}>
-        {/* Header */}
-        <p style={{ fontFamily: 'var(--font-label)', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--clr-accent)', marginBottom: '8px' }}>
+
+        {/* Eyebrow */}
+        <p style={{
+          fontFamily: 'var(--nk-font-sans)', fontSize: '10px',
+          letterSpacing: '0.22em', textTransform: 'uppercase',
+          color: 'var(--nk-gold)', marginBottom: '10px',
+        }}>
           Naksha
         </p>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 300, color: '#fff', marginBottom: '6px', lineHeight: 1.2 }}>
+
+        {/* Title */}
+        <h2 style={{
+          fontFamily: 'var(--nk-font-display)', fontSize: 'clamp(22px, 5vw, 28px)',
+          fontWeight: 400, color: 'var(--nk-text)',
+          marginBottom: '6px', lineHeight: 1.2,
+        }}>
           {tab === 'register' ? 'Save your karmic map' : 'Welcome back'}
         </h2>
-        <p style={{ fontFamily: 'var(--font-label)', fontSize: '13px', color: 'var(--clr-text-2)', marginBottom: '28px', lineHeight: 1.6 }}>
+        <p style={{
+          fontFamily: 'var(--nk-font-sans)', fontSize: '13px',
+          color: 'var(--nk-text-3)', marginBottom: '28px', lineHeight: 1.65,
+        }}>
           {tab === 'register'
             ? 'Create your account to access Go Deeper, Bonds, and save your chart.'
             : 'Sign in to continue your journey.'}
         </p>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '4px' }}>
+        {/* Pill tab switcher — same pattern as chart page */}
+        <div style={{
+          display: 'inline-flex',
+          background: 'var(--nk-surface-2)',
+          border: '1px solid var(--nk-border)',
+          borderRadius: 'var(--nk-r-pill)',
+          padding: '3px', gap: '2px',
+          marginBottom: '24px',
+        }}>
           {(['register', 'login'] as const).map(t => (
             <button
               key={t}
               onClick={() => { setTab(t); setError('') }}
               style={{
-                flex: 1, padding: '8px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-                fontFamily: 'var(--font-label)', fontSize: '12px', letterSpacing: '0.08em',
-                background: tab === t ? 'rgba(255,255,255,0.1)' : 'transparent',
-                color: tab === t ? '#fff' : 'rgba(255,255,255,0.45)',
-                transition: 'all 200ms ease',
+                padding: '7px 22px',
+                borderRadius: '16px',
+                border: 'none', cursor: 'pointer',
+                fontFamily: 'var(--nk-font-sans)', fontSize: '10px',
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                background: tab === t ? 'rgba(91,140,255,0.15)' : 'transparent',
+                color: tab === t ? 'var(--nk-primary)' : 'var(--nk-text-3)',
+                transition: 'all 150ms ease',
+                whiteSpace: 'nowrap',
               }}
             >
               {t === 'register' ? 'Sign Up' : 'Sign In'}
@@ -110,14 +138,17 @@ export default function AuthModal() {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            onFocus={() => setFocusedField('email')}
+            onBlur={() => setFocusedField(null)}
             required
-            style={inputStyle}
+            style={inputStyle('email')}
           />
           {tab === 'register' && (
             <input
@@ -125,8 +156,10 @@ export default function AuthModal() {
               placeholder="@username"
               value={username}
               onChange={e => setUsername(e.target.value.replace(/^@/, ''))}
+              onFocus={() => setFocusedField('username')}
+              onBlur={() => setFocusedField(null)}
               required
-              style={inputStyle}
+              style={inputStyle('username')}
             />
           )}
           <input
@@ -134,12 +167,21 @@ export default function AuthModal() {
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            onFocus={() => setFocusedField('password')}
+            onBlur={() => setFocusedField(null)}
             required
-            style={inputStyle}
+            style={inputStyle('password')}
           />
 
           {error && (
-            <p style={{ fontFamily: 'var(--font-label)', fontSize: '12px', color: '#e06a6a', lineHeight: 1.5 }}>
+            <p style={{
+              fontFamily: 'var(--nk-font-sans)', fontSize: '12px',
+              color: 'var(--nk-danger)', lineHeight: 1.5,
+              padding: '8px 12px',
+              background: 'rgba(224,106,106,0.08)',
+              border: '1px solid rgba(224,106,106,0.20)',
+              borderRadius: 'var(--nk-r-sm)',
+            }}>
               {error}
             </p>
           )}
@@ -148,19 +190,22 @@ export default function AuthModal() {
             type="submit"
             disabled={loading}
             style={{
-              marginTop: '8px',
-              padding: '13px',
-              background: loading ? 'rgba(212,184,150,0.3)' : 'rgba(212,184,150,0.15)',
-              border: '1px solid rgba(212,184,150,0.4)',
-              borderRadius: '8px',
-              color: loading ? 'rgba(255,255,255,0.4)' : 'var(--clr-accent)',
-              fontFamily: 'var(--font-label)',
+              marginTop: '6px',
+              padding: '14px',
+              background: loading ? 'rgba(91,140,255,0.15)' : 'rgba(91,140,255,0.18)',
+              border: '1px solid rgba(91,140,255,0.35)',
+              borderRadius: 'var(--nk-r-md)',
+              color: loading ? 'var(--nk-text-3)' : 'var(--nk-primary)',
+              fontFamily: 'var(--nk-font-sans)',
               fontSize: '11px',
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
               cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 200ms ease',
+              transition: 'all 150ms ease',
+              boxShadow: loading ? 'none' : 'var(--nk-primary-glow)',
             }}
+            onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(91,140,255,0.28)' }}
+            onMouseLeave={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(91,140,255,0.18)' }}
           >
             {loading ? 'Please wait…' : tab === 'register' ? 'Create account' : 'Sign in'}
           </button>

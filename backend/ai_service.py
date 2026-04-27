@@ -211,29 +211,48 @@ def core_reading(
     lagna_sign: str, lagna_nakshatra: str, lagna_pada: int,
     moon_sign: str, moon_nakshatra: str, moon_house: int,
     sun_sign: str, sun_house: int, sun_nakshatra: str,
-    saturn_sign: str, saturn_house: int,
-    mars_sign: str, mars_house: int,
+    planets: dict,
+    yogas: list,
     maha_planet: str,
 ) -> dict:
     """Returns {who_are_you, what_stands_out (array), presence_and_inner_world}"""
+
+    # Build a compact planet summary: "Mars: Scorpio H8, exalted, Rx"
+    planet_lines = []
+    for pname, p in planets.items():
+        if not p:
+            continue
+        flags = []
+        if p.get("dignity") and p["dignity"] not in ("neutral", "friend"):
+            flags.append(p["dignity"])
+        if p.get("is_retrograde"):
+            flags.append("Rx")
+        if p.get("combust"):
+            flags.append("combust")
+        flag_str = f", {', '.join(flags)}" if flags else ""
+        planet_lines.append(f"  {pname}: {p.get('sign','')} H{p.get('house','')}{flag_str}")
+
+    yoga_names = [y["name"] for y in yogas] if yogas else []
+
     user = f"""For this Vedic birth chart, answer these core identity questions with warmth and precision.
 
 Chart data:
 - Lagna (rising): {lagna_sign}, {lagna_nakshatra} pada {lagna_pada}
-- Moon: {moon_sign} house {moon_house}, {moon_nakshatra}
-- Sun: {sun_sign} house {sun_house}, {sun_nakshatra}
-- Saturn: {saturn_sign} house {saturn_house}
-- Mars: {mars_sign} house {mars_house}
+- Moon: {moon_sign} H{moon_house}, {moon_nakshatra}
+- Sun: {sun_sign} H{sun_house}, {sun_nakshatra}
+- All planets:
+{chr(10).join(planet_lines)}
+- Active yogas: {', '.join(yoga_names) if yoga_names else 'none detected'}
 - Current mahadasha: {maha_planet}
 
 Return ONLY a JSON object with exactly these keys:
 
 1. "who_are_you": 3-4 sentences (~90 words) — the essential nature of this person, what makes them distinctly themselves at their core. The first sentence should be a high-level summary that could stand alone. The following sentences add texture.
 
-2. "what_stands_out": an array of 3-4 objects, each highlighting one striking feature of this chart. Each object has:
+2. "what_stands_out": an array of 3-4 objects, each identifying the most striking or unusual features of THIS specific chart — prioritise rare yogas, exalted/debilitated planets, angular placements, retrograde significators, strong Rahu/Ketu placements. Do NOT default to Lagna/Moon/Sun if something rarer is present. Each object has:
    - "headline": 4-7 words naming the striking feature (e.g. "Jupiter elevated in the 5th house", "A rare Gaja Kesari formation")
    - "body": 2 sentences (~40 words) on why this matters specifically for this person
-   - "tag": 1-3 words showing the astrological source (e.g. "Jupiter H5", "Moon yoga", "Saturn Rx")
+   - "tag": the planet name exactly as given above (e.g. "Jupiter", "Saturn", "Rahu") — single planet only, used to highlight it on the chart
 
 3. "presence_and_inner_world": 3-4 sentences (~90 words) — a merged portrait of how this person comes across to others (shaped by their rising sign) alongside the emotional world they carry within (shaped by their Moon). First sentence: the outer impression. Remaining sentences: the inner landscape.
 
