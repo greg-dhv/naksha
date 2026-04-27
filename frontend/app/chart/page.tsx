@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import BirthChartWheel from '@/components/BirthChartWheel'
-import { ChartResponse, PlanetInfo, StandoutItem, SoulTheme } from '@/lib/types'
+import { ChartResponse, ChartData, PlanetInfo, StandoutItem, SoulTheme } from '@/lib/types'
 import { PLANET_SYMBOLS, PLANET_COLORS, SIGN_SYMBOLS } from '@/lib/api'
 import { getNakshatraSrc, getYogaMeta } from '@/lib/illustrations'
 import { useAuth } from '@/contexts/AuthContext'
@@ -195,9 +195,9 @@ function CoreSection({ data, onGoDeeper }: { data: ChartResponse; onGoDeeper: (f
         />
       )}
 
-      {/* What stands out — grid */}
+      {/* What stands out — natal chart */}
       {core?.what_stands_out && core.what_stands_out.length > 0 && (
-        <StandoutGrid items={core.what_stands_out} onGoDeeper={onGoDeeper} />
+        <ChartStandout items={core.what_stands_out} chart={chart} onGoDeeper={onGoDeeper} />
       )}
 
       {/* Presence & inner world — merged */}
@@ -216,9 +216,67 @@ function CoreSection({ data, onGoDeeper }: { data: ChartResponse; onGoDeeper: (f
   )
 }
 
-// ── Standout Grid ─────────────────────────────────────────────────────────────
+// ── South Indian natal chart ──────────────────────────────────────────────────
+//
+// Fixed 4×4 grid, sign positions never move:
+// [Pis][Ari][Tau][Gem]
+// [Aqu][  center  ][Can]
+// [Cap][  center  ][Leo]
+// [Sag][Sco][Lib][Vir]
+//
+// Each cell = grid area; center 2×2 is empty (chart identity space).
 
-function StandoutGrid({ items, onGoDeeper }: { items: StandoutItem[]; onGoDeeper: (from?: string) => void }) {
+const SI_SIGNS = [
+  'Aries','Taurus','Gemini','Cancer',
+  'Leo','Virgo','Libra','Scorpio',
+  'Sagittarius','Capricorn','Aquarius','Pisces',
+]
+
+// [row, col] for each sign index 0=Aries … 11=Pisces (0-based, 4×4 grid)
+const SI_POS: [number, number][] = [
+  [0,1],[0,2],[0,3],[1,3], // Aries Taurus Gemini Cancer
+  [2,3],[3,3],[3,2],[3,1], // Leo Virgo Libra Scorpio
+  [3,0],[2,0],[1,0],[0,0], // Sag Cap Aqu Pisces
+]
+
+const SIGN_SHORT: Record<string,string> = {
+  Aries:'Ari', Taurus:'Tau', Gemini:'Gem', Cancer:'Can',
+  Leo:'Leo', Virgo:'Vir', Libra:'Lib', Scorpio:'Sco',
+  Sagittarius:'Sag', Capricorn:'Cap', Aquarius:'Aqu', Pisces:'Pis',
+}
+
+function ChartStandout({ items, chart, onGoDeeper }: {
+  items: StandoutItem[]
+  chart: ChartData
+  onGoDeeper: (from?: string) => void
+}) {
+  const [active, setActive] = useState(0)
+  const item = items[active]
+
+  // Map planets to their sign_index
+  const planetsBySign: Record<number, string[]> = {}
+  for (const [name, p] of Object.entries(chart.planets)) {
+    if (!p) continue
+    const si = p.sign_index
+    if (!planetsBySign[si]) planetsBySign[si] = []
+    planetsBySign[si].push(name)
+  }
+
+  // Lagna sign index
+  const lagnaSignIdx = chart.lagna.sign_index
+
+  // Which sign index is the highlighted planet in?
+  // tag may be exact planet name ("Saturn") or legacy format ("Saturn H8", "Moon yoga")
+  const rawTag = item?.tag ?? ''
+  const highlightPlanet = chart.planets[rawTag]
+    ? rawTag
+    : chart.planets[rawTag.split(' ')[0]] ? rawTag.split(' ')[0] : rawTag
+  const highlightedSignIdx = chart.planets[highlightPlanet]
+    ? chart.planets[highlightPlanet].sign_index
+    : highlightPlanet === 'Lagna' ? lagnaSignIdx : null
+
+  const accentColor = SECTION_ACCENT.core
+
   return (
     <div style={{
       background: 'rgba(255,255,255,0.03)',
@@ -228,70 +286,158 @@ function StandoutGrid({ items, onGoDeeper }: { items: StandoutItem[]; onGoDeeper
     }}>
       <p style={{
         fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.18em',
-        textTransform: 'uppercase', color: SECTION_ACCENT.core, marginBottom: '16px',
+        textTransform: 'uppercase', color: accentColor, marginBottom: '16px',
       }}>
         What stands out in your chart?
       </p>
 
+      {/* South Indian chart grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '10px',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateRows: 'repeat(4, 1fr)',
+        aspectRatio: '1',
+        border: '1px solid rgba(255,255,255,0.10)',
+        borderRadius: 'var(--nk-r-md)',
+        overflow: 'hidden',
+        marginBottom: '16px',
       }}>
-        {items.map((item, i) => {
-          const color = STANDOUT_COLORS[i % STANDOUT_COLORS.length]
+        {SI_SIGNS.map((sign, si) => {
+          const [row, col] = SI_POS[si]
+          const isLagna = si === lagnaSignIdx
+          const isHighlighted = si === highlightedSignIdx
+          const planetsHere = planetsBySign[si] || []
+          const isDimmed = highlightedSignIdx !== null && !isHighlighted && !isLagna
+          const houseNum = ((si - lagnaSignIdx + 12) % 12) + 1
+
           return (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: `1px solid rgba(255,255,255,0.08)`,
-              borderTop: `2px solid ${color}30`,
-              borderRadius: 'var(--nk-r-md)',
-              padding: '14px',
+            <div key={sign} style={{
+              gridRow: `${row + 1}`,
+              gridColumn: `${col + 1}`,
+              borderRight: col < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+              borderBottom: row < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+              position: 'relative',
+              background: isHighlighted
+                ? `${accentColor}14`
+                : isLagna ? 'rgba(255,255,255,0.04)' : 'transparent',
+              transition: 'background var(--dur-normal)',
+              opacity: isDimmed ? 0.35 : 1,
+              display: 'flex',
+              flexDirection: 'column',
             }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
-                <div style={{
-                  width: '6px', height: '6px', borderRadius: '50%',
-                  background: color, flexShrink: 0, marginTop: '5px',
-                  boxShadow: `0 0 6px ${color}60`,
-                }} />
-                <p style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '15px', fontWeight: 500, color: 'var(--nk-text)', lineHeight: 1.3,
-                }}>
-                  {item.headline}
-                </p>
-              </div>
-              <p style={{
-                fontFamily: 'var(--font-sans)', fontSize: '11px',
-                color: 'var(--nk-text-2)', lineHeight: 1.65, marginBottom: '10px',
-              }}>
-                {item.body}
-              </p>
-              {item.tag && (
+              {/* Top row: sign abbrev left, house# / ASC right */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '4px 5px 0' }}>
                 <span style={{
-                  fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.05em',
-                  padding: '2px 8px', borderRadius: '20px',
-                  background: `${color}12`, border: `1px solid ${color}30`, color,
+                  fontFamily: 'var(--font-sans)', fontSize: '7px',
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
+                  color: isLagna ? accentColor : 'rgba(255,255,255,0.22)',
+                  lineHeight: 1,
                 }}>
-                  {item.tag}
+                  {SIGN_SHORT[sign]}
                 </span>
+                {isLagna ? (
+                  <span style={{
+                    fontFamily: 'var(--font-sans)', fontSize: '7px',
+                    fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                    color: accentColor, lineHeight: 1,
+                    textShadow: `0 0 8px ${accentColor}`,
+                  }}>
+                    ASC
+                  </span>
+                ) : (
+                  <span style={{
+                    fontFamily: 'var(--font-sans)', fontSize: '7px',
+                    color: 'rgba(255,255,255,0.18)', lineHeight: 1,
+                  }}>
+                    {houseNum}
+                  </span>
+                )}
+              </div>
+
+              {/* Planet glyphs — centered in remaining space */}
+              <div style={{
+                flex: 1,
+                display: 'flex', flexWrap: 'wrap',
+                alignItems: 'center', justifyContent: 'center',
+                gap: '2px', padding: '2px 4px 4px',
+              }}>
+                {planetsHere.map(p => (
+                  <span key={p} style={{
+                    fontSize: planetsHere.length > 2 ? '13px' : '16px',
+                    color: p === highlightPlanet
+                      ? accentColor
+                      : (PLANET_COLORS[p] || 'rgba(255,255,255,0.60)'),
+                    filter: p === highlightPlanet ? `drop-shadow(0 0 5px ${accentColor})` : 'none',
+                    lineHeight: 1,
+                  }}>
+                    {PLANET_SYMBOLS[p] || p[0]}
+                  </span>
+                ))}
+              </div>
+
+              {/* Highlight glow border */}
+              {isHighlighted && (
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  border: `1px solid ${accentColor}60`,
+                  borderRadius: 'inherit',
+                  pointerEvents: 'none',
+                }} />
               )}
             </div>
           )
         })}
+
+        {/* Centre 2×2 — empty identity space */}
+        {([[1,1],[1,2],[2,1],[2,2]] as [number,number][]).map(([r,c]) => (
+          <div key={`c${r}${c}`} style={{
+            gridRow: r + 1, gridColumn: c + 1,
+            borderRight: c < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+            borderBottom: r < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+          }} />
+        ))}
       </div>
 
-      {/* Go deeper CTA */}
+      {/* Active item explanation */}
+      <div style={{ marginBottom: '14px' }}>
+        <p style={{
+          fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 500,
+          color: 'var(--nk-text)', lineHeight: 1.4, marginBottom: '6px',
+        }}>
+          {item.headline}
+        </p>
+        <p style={{
+          fontFamily: 'var(--font-sans)', fontSize: '14px',
+          color: 'var(--nk-text-2)', lineHeight: 1.65,
+        }}>
+          {item.body}
+        </p>
+      </div>
+
+      {/* Pagination dots + Go deeper */}
       <div style={{
-        display: 'flex', justifyContent: 'flex-end',
-        marginTop: '14px', paddingTop: '12px',
-        borderTop: '1px solid var(--nk-border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        paddingTop: '12px', borderTop: '1px solid var(--nk-border)',
       }}>
+        <div style={{ display: 'flex', gap: '7px', alignItems: 'center' }}>
+          {items.map((_, i) => (
+            <button key={i} onClick={() => setActive(i)} style={{
+              width: i === active ? '18px' : '6px',
+              height: '6px',
+              borderRadius: '3px',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              background: i === active ? accentColor : 'rgba(255,255,255,0.18)',
+              transition: 'all var(--dur-normal)',
+            }} />
+          ))}
+        </div>
         <button onClick={() => onGoDeeper('chart-stands-out')} style={{
           display: 'flex', alignItems: 'center', gap: '5px',
           background: 'none', border: 'none', cursor: 'pointer', padding: 0,
           fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.14em',
-          textTransform: 'uppercase', color: SECTION_ACCENT.core,
+          textTransform: 'uppercase', color: accentColor,
           transition: 'opacity var(--dur-fast)',
         }}
           onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
@@ -300,6 +446,157 @@ function StandoutGrid({ items, onGoDeeper }: { items: StandoutItem[]; onGoDeeper
           Go deeper <span style={{ fontSize: '12px' }}>→</span>
         </button>
       </div>
+    </div>
+  )
+}
+
+// ── Archetypes List ───────────────────────────────────────────────────────────
+
+function ArchetypesList({ archetypes, moonNakshatra, accent }: {
+  archetypes: { name: string; description: string; strength_labels?: string[] }[]
+  moonNakshatra?: string
+  accent: string
+}) {
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null)
+  const core = archetypes[0]
+  const rest = archetypes.slice(1)
+  const coreIcon = moonNakshatra ? getNakshatraSrc(moonNakshatra) : null
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+      {/* Core archetype — always expanded, prominent */}
+      <div style={{
+        background: `${accent}0d`,
+        border: `1px solid ${accent}30`,
+        borderRadius: 'var(--nk-r-lg)',
+        padding: '20px',
+      }}>
+        {/* Eyebrow */}
+        <p style={{
+          fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.18em',
+          textTransform: 'uppercase', color: accent, marginBottom: '14px', opacity: 0.8,
+        }}>
+          Your core archetype
+        </p>
+
+        {/* Icon + name row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+          {coreIcon && (
+            <div style={{
+              width: '48px', height: '48px', flexShrink: 0,
+              background: `${accent}12`,
+              border: `1px solid ${accent}30`,
+              borderRadius: 'var(--nk-r-md)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <img src={coreIcon} alt="" aria-hidden="true" style={{ width: '28px', height: '28px', opacity: 0.85 }} />
+            </div>
+          )}
+          <p style={{
+            fontFamily: 'var(--nk-font-display, var(--font-sans))',
+            fontSize: 'clamp(20px, 4vw, 26px)', fontWeight: 400,
+            color: 'var(--nk-text)', lineHeight: 1.2,
+          }}>
+            {core.name}
+          </p>
+        </div>
+
+        {/* Description */}
+        <p style={{
+          fontFamily: 'var(--font-sans)', fontSize: '15px',
+          color: 'var(--nk-text-2)', lineHeight: 1.7,
+        }}>
+          {core.description}
+        </p>
+
+        {/* Strength labels */}
+        {core.strength_labels && core.strength_labels.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '14px', paddingTop: '14px', borderTop: `1px solid ${accent}18` }}>
+            {core.strength_labels.map((label, j) => (
+              <span key={j} style={{
+                fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.06em',
+                padding: '3px 10px', borderRadius: '20px',
+                background: `${accent}10`, border: `1px solid ${accent}25`,
+                color: accent,
+              }}>
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Supporting archetypes — collapsible rows */}
+      {rest.map((arch, i) => {
+        const idx = i + 1
+        const isOpen = expandedIdx === idx
+        return (
+          <button
+            key={idx}
+            onClick={() => setExpandedIdx(isOpen ? null : idx)}
+            style={{
+              textAlign: 'left', cursor: 'pointer',
+              background: isOpen ? `${accent}0a` : 'var(--nk-surface)',
+              border: `1px solid ${isOpen ? accent + '28' : 'var(--nk-border)'}`,
+              borderRadius: 'var(--nk-r-md)',
+              padding: '14px 16px',
+              transition: 'all var(--dur-fast)',
+            }}
+          >
+            {/* Collapsed row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{
+                fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.12em',
+                color: 'var(--nk-text-4)', flexShrink: 0, width: '14px',
+              }}>
+                0{idx + 1}
+              </span>
+              <p style={{
+                flex: 1,
+                fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 500,
+                color: 'var(--nk-text)', lineHeight: 1.3,
+              }}>
+                {arch.name}
+              </p>
+              <span style={{
+                fontSize: '10px', color: 'var(--nk-text-4)',
+                transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform var(--dur-fast)',
+                display: 'inline-block', flexShrink: 0,
+              }}>
+                ▾
+              </span>
+            </div>
+
+            {/* Expanded body */}
+            {isOpen && (
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${accent}18` }}>
+                <p style={{
+                  fontFamily: 'var(--font-sans)', fontSize: '14px',
+                  color: 'var(--nk-text-2)', lineHeight: 1.7,
+                }}>
+                  {arch.description}
+                </p>
+                {arch.strength_labels && arch.strength_labels.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px' }}>
+                    {arch.strength_labels.map((label, j) => (
+                      <span key={j} style={{
+                        fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.06em',
+                        padding: '3px 10px', borderRadius: '20px',
+                        background: `${accent}10`, border: `1px solid ${accent}25`,
+                        color: accent,
+                      }}>
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -333,73 +630,7 @@ function NaturalGiftsSection({ data, onGoDeeper }: { data: ChartResponse; onGoDe
 
       {/* Archetypes */}
       {powers?.archetypes && powers.archetypes.length > 0 && (
-        <div>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.18em',
-            textTransform: 'uppercase', color: SECTION_ACCENT.gifts, marginBottom: '10px',
-          }}>
-            Your archetypes
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {powers.archetypes.map((arch, i) => (
-              <div key={i} style={{
-                background: 'rgba(126,200,160,0.06)',
-                border: '1px solid rgba(126,200,160,0.15)',
-                borderRadius: 'var(--nk-r-md)', padding: '14px 16px',
-              }}>
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: arch.strength_labels?.length ? '12px' : 0 }}>
-                  <span style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '22px', color: SECTION_ACCENT.gifts, opacity: 0.6,
-                    lineHeight: 1, flexShrink: 0, marginTop: '2px',
-                  }}>
-                    {i + 1}
-                  </span>
-                  <div>
-                    <p style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '17px', fontWeight: 500, color: 'var(--nk-text)', marginBottom: '4px',
-                    }}>
-                      {arch.name}
-                    </p>
-                    <p style={{
-                      fontFamily: 'var(--font-sans)', fontSize: '12px',
-                      color: 'var(--nk-text-2)', lineHeight: 1.65,
-                    }}>
-                      {arch.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Strength labels */}
-                {arch.strength_labels && arch.strength_labels.length > 0 && (
-                  <div style={{
-                    paddingTop: '10px',
-                    borderTop: '1px solid rgba(126,200,160,0.12)',
-                    display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center',
-                  }}>
-                    <span style={{
-                      fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.14em',
-                      textTransform: 'uppercase', color: 'var(--nk-text-3)', marginRight: '2px',
-                    }}>
-                      Strengths
-                    </span>
-                    {arch.strength_labels.map((label, j) => (
-                      <span key={j} style={{
-                        fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.06em',
-                        padding: '3px 10px', borderRadius: '20px',
-                        background: 'rgba(126,200,160,0.10)', border: '1px solid rgba(126,200,160,0.25)',
-                        color: SECTION_ACCENT.gifts,
-                      }}>
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <ArchetypesList archetypes={powers.archetypes} moonNakshatra={moon?.nakshatra} accent={SECTION_ACCENT.gifts} />
       )}
     </Section>
   )
@@ -688,8 +919,8 @@ function ChartDetailView({ data, expandedPlanet, onExpandPlanet, user, onSave }:
       </div>
 
       {/* Wheel */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-        <div style={{ width: '100%', maxWidth: '300px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+        <div style={{ width: '100%', maxWidth: '420px' }}>
           <BirthChartWheel chart={chart} />
         </div>
       </div>
@@ -824,34 +1055,64 @@ function ReadingCard({ question, answer, accent, chips, cta, onGoDeeper }: {
   cta?: boolean
   onGoDeeper?: (from?: string) => void
 }) {
-  // First sentence bold as summary, rest as body
+  const [expanded, setExpanded] = useState(false)
+
+  // Split into opening sentence (headline) + rest (body).
+  // Strategy: find the first sentence boundary (.!?) followed by a space + capital letter.
+  // If that fails (e.g. one giant run-on), split at the first comma-clause boundary ~120 chars in.
   let headline = answer ?? ''
   let body = ''
   if (answer) {
-    const m = answer.match(/^(.+?[.!?])\s+(.+)$/s)
-    if (m && m[1].length < 200) { headline = m[1]; body = m[2] }
+    // Primary: first sentence ending with .!? before a space + uppercase
+    const m = answer.match(/^(.+?[.!?])\s+([A-Z].+)$/s)
+    if (m) {
+      headline = m[1]
+      body = m[2]
+    } else {
+      // Fallback: split at last word boundary before 160 chars
+      const cut = answer.lastIndexOf(' ', 160)
+      if (cut > 60) {
+        headline = answer.slice(0, cut) + '…'
+        body = answer
+      }
+    }
   }
 
+  const hasBody = !!body
+
   return (
-    <div style={{
-      background: 'var(--nk-surface)',
-      border: '1px solid var(--nk-border)',
-      borderRadius: 'var(--nk-r-lg)',
-      padding: '20px',
-      boxShadow: 'var(--nk-shadow-sm)',
-    }}>
+    <div
+      onClick={() => hasBody && setExpanded(e => !e)}
+      style={{
+        background: 'var(--nk-surface)',
+        border: '1px solid var(--nk-border)',
+        borderRadius: 'var(--nk-r-lg)',
+        padding: '20px',
+        boxShadow: 'var(--nk-shadow-sm)',
+        cursor: hasBody ? 'pointer' : 'default',
+        transition: 'border-color var(--dur-fast)',
+      }}
+      onMouseEnter={e => { if (hasBody) (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.18)' }}
+      onMouseLeave={e => { if (hasBody) (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.08)' }}
+    >
+      {/* Eyebrow */}
       <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: accent, marginBottom: '12px' }}>
         {question}
       </p>
 
       {answer ? (
         <>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '19px', fontWeight: 400, color: 'var(--nk-text)', lineHeight: 1.65, marginBottom: body ? '10px' : 0 }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '19px', fontWeight: 400, color: 'var(--nk-text)', lineHeight: 1.65, marginBottom: hasBody ? '10px' : 0 }}>
             {headline}
           </p>
-          {body && (
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '17px', color: 'var(--nk-text-2)', lineHeight: 1.75 }}>
+          {expanded && body && (
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '17px', color: 'var(--nk-text-2)', lineHeight: 1.75, marginBottom: '10px' }}>
               {body}
+            </p>
+          )}
+          {hasBody && (
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '0.08em', color: accent, opacity: 0.75 }}>
+              {expanded ? '↑ Less' : 'Read more ↓'}
             </p>
           )}
         </>
@@ -862,16 +1123,19 @@ function ReadingCard({ question, answer, accent, chips, cta, onGoDeeper }: {
       )}
 
       {(chips.length > 0 || cta) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--nk-border)', flexWrap: 'wrap' }}>
+        <div onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--nk-border)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
             {chips.map((chip, i) => {
               const parts = chip.split(' · ')
+              const firstWord = parts[0].split(' ')[0]
+
               // Type 1 — Nakshatra: last segment after · is a nakshatra name
               const nakshatraSrc = getNakshatraSrc(parts[parts.length - 1])
               // Type 2 — Yoga: full chip text matches a yoga
               const yogaMeta = getYogaMeta(chip)
-              // Type 3 — Placement: extract planet symbol from first word
-              const planetSymbol = PLANET_SYMBOLS[parts[0].split(' ')[0]]
+              // Type 3 — Placement: planet or sign symbol from first word
+              const planetSymbol = PLANET_SYMBOLS[firstWord]
+              const signSymbol = SIGN_SYMBOLS[firstWord]
 
               if (nakshatraSrc) {
                 return (
@@ -891,10 +1155,11 @@ function ReadingCard({ question, answer, accent, chips, cta, onGoDeeper }: {
                 )
               }
 
-              // Placement chip
+              // Placement chip — planet or sign symbol as prefix
+              const icon = planetSymbol || signSymbol
               return (
                 <span key={i} style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.05em', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'var(--nk-text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  {planetSymbol && <span style={{ fontSize: '11px', opacity: 0.6 }}>{planetSymbol}</span>}
+                  {icon && <span style={{ fontSize: '11px', opacity: 0.6 }}>{icon}</span>}
                   {chip}
                 </span>
               )
