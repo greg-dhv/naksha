@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="ashwini nakshatra">
+  <title>Naksha · ashwini</title>
+  <defs>
+    <radialGradient id="bg-1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#162238" stop-opacity="0.9"></stop>
+      <stop offset="100%" stop-color="#0B1220" stop-opacity="1"></stop>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="url(#bg-1)" stroke="#D4B896" stroke-opacity="0.22" stroke-width="0.8"></circle>
+  <circle cx="32" cy="32" r="31" fill="none" stroke="#F2EBDA" stroke-opacity="0.04" stroke-width="0.4"></circle>
+  <circle cx="21.9" cy="50.6" r="0.4" fill="#F2EBDA" opacity="0.16"></circle><circle cx="53.6" cy="52.2" r="0.4" fill="#F2EBDA" opacity="0.13"></circle><circle cx="24.3" cy="48.3" r="0.4" fill="#F2EBDA" opacity="0.12"></circle><circle cx="18.5" cy="55.3" r="0.4" fill="#F2EBDA" opacity="0.11"></circle><circle cx="22.2" cy="49.5" r="0.4" fill="#F2EBDA" opacity="0.22"></circle><circle cx="55.8" cy="38.1" r="0.4" fill="#F2EBDA" opacity="0.13"></circle>
+  <circle cx="9" cy="8" r="0.9" fill="#F2EBDA" opacity="0.95"></circle><circle cx="15" cy="12" r="0.65" fill="#F2EBDA" opacity="0.75"></circle><circle cx="19" cy="8" r="0.65" fill="#F2EBDA" opacity="0.75"></circle>
+  
+    <g stroke="#D4B896" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+      <path d="M 24 50 Q 22 42 26 36 Q 30 30 38 30 Q 44 30 46 34 L 46 40 Q 44 44 40 44 L 40 50"></path>
+      <path d="M 38 30 L 40 24 L 43 30"></path>
+      <circle cx="42" cy="36" r="0.7" fill="#D4B896" stroke="none"></circle>
+    </g>
+</svg>

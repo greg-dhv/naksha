@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import BirthChartWheel from '@/components/BirthChartWheel'
 import { ChartResponse, PlanetInfo, StandoutItem, SoulTheme } from '@/lib/types'
 import { PLANET_SYMBOLS, PLANET_COLORS, SIGN_SYMBOLS } from '@/lib/api'
+import { getNakshatraSrc, getYogaMeta } from '@/lib/illustrations'
 import { useAuth } from '@/contexts/AuthContext'
 import AppShell from '@/components/AppShell'
 
@@ -177,7 +178,8 @@ function CoreSection({ data, onGoDeeper }: { data: ChartResponse; onGoDeeper: (f
 
   return (
     <Section number="01" title="Your Core Self" accent={SECTION_ACCENT.core}
-      intro="The foundation of who you are — your nature, your presence, and the world you carry within.">
+      intro="The foundation of who you are — your nature, your presence, and the world you carry within."
+      illustration="/illustrations/01-core-self.svg">
 
       {/* Who are you */}
       {core?.who_are_you && (
@@ -188,7 +190,7 @@ function CoreSection({ data, onGoDeeper }: { data: ChartResponse; onGoDeeper: (f
           chips={[
             lagna.sign && `${lagna.sign} Rising`,
             moon && `Moon · ${moon.sign} H${moon.house}`,
-            moon?.nakshatra,
+            moon && `Moon · ${moon.nakshatra}`,
           ].filter(Boolean) as string[]}
         />
       )}
@@ -312,7 +314,8 @@ function NaturalGiftsSection({ data, onGoDeeper }: { data: ChartResponse; onGoDe
 
   return (
     <Section number="02" title="Your Natural Gifts" accent={SECTION_ACCENT.gifts}
-      intro="The strengths and archetypes you were born carrying — how your gifts naturally express in the world.">
+      intro="The strengths and archetypes you were born carrying — how your gifts naturally express in the world."
+      illustration="/illustrations/02-natural-gifts.svg">
 
       {/* Gifts summary */}
       {powers?.gifts && (
@@ -322,7 +325,7 @@ function NaturalGiftsSection({ data, onGoDeeper }: { data: ChartResponse; onGoDe
           accent={SECTION_ACCENT.gifts}
           chips={[
             jupiter && `Jupiter · ${jupiter.sign} H${jupiter.house}`,
-            moon?.nakshatra,
+            moon && `Moon · ${moon.nakshatra}`,
             chart.yogas?.[0]?.name,
           ].filter(Boolean) as string[]}
         />
@@ -415,7 +418,8 @@ function PathSection({ data, onGoDeeper }: { data: ChartResponse; onGoDeeper: (f
 
   return (
     <Section number="03" title="Your Path" accent={SECTION_ACCENT.path}
-      intro="Your purpose, your soul's depth, what you are here to build, and what asks to be released.">
+      intro="Your purpose, your soul's depth, what you are here to build, and what asks to be released."
+      illustration="/illustrations/03-your-path.svg">
 
       {/* Dharma */}
       {growth?.dharma && (
@@ -563,7 +567,8 @@ function LoveSection({ data, onBonds }: { data: ChartResponse; onBonds: () => vo
 
   return (
     <Section number="04" title="Love & Relationships" accent={SECTION_ACCENT.love}
-      intro="How you love, what you need, and what kind of connection brings out the best in you.">
+      intro="How you love, what you need, and what kind of connection brings out the best in you."
+      illustration="/illustrations/04-love-relationships.svg">
 
       {/* Love style */}
       {love.love_style && (
@@ -713,12 +718,20 @@ function ChartDetailView({ data, expandedPlanet, onExpandPlanet, user, onSave }:
             Active yogas
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {chart.yogas.map((yoga, i) => (
-              <div key={i} style={{ background: 'var(--nk-primary-dim)', border: '1px solid var(--nk-primary-line)', borderRadius: 'var(--nk-r-md)', padding: '8px 14px' }}>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: 600, color: 'var(--nk-primary)', marginBottom: '2px' }}>{yoga.name}</p>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'var(--nk-text-3)' }}>{yoga.description}</p>
-              </div>
-            ))}
+            {chart.yogas.map((yoga, i) => {
+              const ym = getYogaMeta(yoga.name)
+              return (
+                <div key={i} style={{ background: `rgba(${ym?.color === '#D4B896' ? '212,184,150' : ym?.color === '#B99CDF' ? '185,156,223' : '91,140,255'},0.08)`, border: `1px solid ${ym?.color ? ym.color + '33' : 'var(--nk-primary-line)'}`, borderRadius: 'var(--nk-r-md)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {ym && (
+                    <img src={ym.src} alt="" aria-hidden="true" style={{ width: '32px', height: '32px', flexShrink: 0, opacity: 0.85 }} />
+                  )}
+                  <div>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: 600, color: ym?.color || 'var(--nk-primary)', marginBottom: '2px' }}>{yoga.name}</p>
+                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'var(--nk-text-3)' }}>{yoga.description}</p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -753,7 +766,10 @@ function ChartDetailView({ data, expandedPlanet, onExpandPlanet, user, onSave }:
               <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: 'var(--nk-text-2)', lineHeight: 1.5 }}>
                 {fmtDeg(p.degree)} {p.sign} · H{p.house}
               </p>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'var(--nk-text-3)', marginTop: '2px' }}>
+              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'var(--nk-text-3)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                {getNakshatraSrc(p.nakshatra) && (
+                  <img src={getNakshatraSrc(p.nakshatra)!} alt="" aria-hidden="true" style={{ width: '14px', height: '14px', opacity: 0.6, flexShrink: 0 }} />
+                )}
                 {p.nakshatra} p{p.pada}{p.is_retrograde ? ' · ℞' : ''}{p.combust ? ' · combust' : ''}
               </p>
               {isExpanded && (
@@ -774,8 +790,8 @@ function ChartDetailView({ data, expandedPlanet, onExpandPlanet, user, onSave }:
 
 // ── Shared Components ─────────────────────────────────────────────────────────
 
-function Section({ number, title, accent, intro, children }: {
-  number: string; title: string; accent: string; intro: string; children: React.ReactNode
+function Section({ number, title, accent, intro, illustration, children }: {
+  number: string; title: string; accent: string; intro: string; illustration?: string; children: React.ReactNode
 }) {
   return (
     <div style={{ padding: '36px 20px 40px', borderBottom: '1px solid var(--nk-border)' }}>
@@ -785,9 +801,14 @@ function Section({ number, title, accent, intro, children }: {
       <h2 style={{ fontFamily: 'var(--font-sans)', fontSize: 'clamp(24px, 5vw, 34px)', fontWeight: 400, color: 'var(--nk-text)', lineHeight: 1.1, marginBottom: '8px' }}>
         {title}
       </h2>
-      <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'var(--nk-text-3)', lineHeight: 1.65, marginBottom: '22px' }}>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'var(--nk-text-3)', lineHeight: 1.65, marginBottom: illustration ? '24px' : '22px' }}>
         {intro}
       </p>
+      {illustration && (
+        <div style={{ marginBottom: '28px', display: 'flex', justifyContent: 'center' }}>
+          <img src={illustration} alt="" aria-hidden="true" style={{ width: '100%', maxWidth: '320px', height: 'auto', opacity: 0.9 }} />
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {children}
       </div>
@@ -843,11 +864,41 @@ function ReadingCard({ question, answer, accent, chips, cta, onGoDeeper }: {
       {(chips.length > 0 || cta) && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--nk-border)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-            {chips.map((chip, i) => (
-              <span key={i} style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.05em', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'var(--nk-text-3)' }}>
-                {chip}
-              </span>
-            ))}
+            {chips.map((chip, i) => {
+              const parts = chip.split(' · ')
+              // Type 1 — Nakshatra: last segment after · is a nakshatra name
+              const nakshatraSrc = getNakshatraSrc(parts[parts.length - 1])
+              // Type 2 — Yoga: full chip text matches a yoga
+              const yogaMeta = getYogaMeta(chip)
+              // Type 3 — Placement: extract planet symbol from first word
+              const planetSymbol = PLANET_SYMBOLS[parts[0].split(' ')[0]]
+
+              if (nakshatraSrc) {
+                return (
+                  <span key={i} style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.05em', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'var(--nk-text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <img src={nakshatraSrc} alt="" aria-hidden="true" style={{ width: '11px', height: '11px', opacity: 0.55, flexShrink: 0 }} />
+                    {chip}
+                  </span>
+                )
+              }
+
+              if (yogaMeta) {
+                return (
+                  <span key={i} style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.05em', padding: '3px 9px', borderRadius: '20px', background: `${yogaMeta.color}12`, border: `1px solid ${yogaMeta.color}30`, color: yogaMeta.color, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <img src={yogaMeta.src} alt="" aria-hidden="true" style={{ width: '11px', height: '11px', opacity: 0.8, flexShrink: 0 }} />
+                    {chip}
+                  </span>
+                )
+              }
+
+              // Placement chip
+              return (
+                <span key={i} style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.05em', padding: '3px 9px', borderRadius: '20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'var(--nk-text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {planetSymbol && <span style={{ fontSize: '11px', opacity: 0.6 }}>{planetSymbol}</span>}
+                  {chip}
+                </span>
+              )
+            })}
           </div>
           {cta && onGoDeeper && (
             <button onClick={() => onGoDeeper()} style={{

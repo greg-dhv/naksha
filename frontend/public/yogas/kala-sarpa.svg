@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Kala Sarpa yoga">
+  <title>Naksha · Kala Sarpa</title>
+  
+    <path d="M 4 12 Q 4 6 12 6 Q 20 6 20 12 Q 20 18 12 18 Q 4 18 4 12 Z" fill="none" stroke="#B99CDF" stroke-width="0.6" opacity="0.55"></path>
+    <circle cx="8" cy="12" r="0.7" fill="#B99CDF" opacity="0.8"></circle>
+    <circle cx="11" cy="12" r="0.7" fill="#B99CDF" opacity="0.8"></circle>
+    <circle cx="14" cy="12" r="0.7" fill="#B99CDF" opacity="0.8"></circle>
+    <circle cx="17" cy="12" r="0.7" fill="#B99CDF" opacity="0.8"></circle>
+</svg>

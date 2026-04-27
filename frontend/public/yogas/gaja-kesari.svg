@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Gaja Kesari yoga">
+  <title>Naksha · Gaja Kesari</title>
+  
+    
+  <g opacity="0.95">
+    <circle cx="7" cy="12" r="0.9" fill="#5B8CFF"></circle>
+    <line x1="5.2" y1="12" x2="8.8" y2="12" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+    <line x1="7" y1="10.2" x2="7" y2="13.8" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+  </g>
+    
+  <g opacity="0.95">
+    <circle cx="17" cy="12" r="0.9" fill="#5B8CFF"></circle>
+    <line x1="15.2" y1="12" x2="18.8" y2="12" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+    <line x1="17" y1="10.2" x2="17" y2="13.8" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+  </g>
+    <path d="M 12 6 Q 19 12 12 18 Q 5 12 12 6 Z" fill="none" stroke="#5B8CFF" stroke-width="0.5" opacity="0.5"></path>
+    <line x1="8" y1="12" x2="16" y2="12" stroke="#5B8CFF" stroke-width="0.4" opacity="0.55" stroke-dasharray="0.8 1.2"></line>
+</svg>

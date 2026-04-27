@@ -1,0 +1,176 @@
+[
+  {
+    "slug": "ruchaka",
+    "name": "Ruchaka",
+    "category": "mahapurusha",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "bhadra",
+    "name": "Bhadra",
+    "category": "mahapurusha",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "hamsa",
+    "name": "Hamsa",
+    "category": "mahapurusha",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "malavya",
+    "name": "Malavya",
+    "category": "mahapurusha",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "shasha",
+    "name": "Shasha",
+    "category": "mahapurusha",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "budha-aditya",
+    "name": "Budha-Aditya",
+    "category": "sun-moon-merc",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "gaja-kesari",
+    "name": "Gaja Kesari",
+    "category": "sun-moon-merc",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "chandra-mangala",
+    "name": "Chandra-Mangala",
+    "category": "sun-moon-merc",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "sunapha",
+    "name": "Sunapha",
+    "category": "moon-context",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "anapha",
+    "name": "Anapha",
+    "category": "moon-context",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "durudhara",
+    "name": "Durudhara",
+    "category": "moon-context",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "kemadruma",
+    "name": "Kemadruma",
+    "category": "moon-context",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "dharma-karma",
+    "name": "Dharma-Karma Adhipati",
+    "category": "raja",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "vipreet-raja",
+    "name": "Vipreet Raja",
+    "category": "raja",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "raja-generic",
+    "name": "Raja (generic)",
+    "category": "raja",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "lakshmi",
+    "name": "Lakshmi",
+    "category": "dhana",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "dhana-generic",
+    "name": "Dhana (generic)",
+    "category": "dhana",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "pravrajya",
+    "name": "Pravrajya",
+    "category": "sannyasa",
+    "color": "#B99CDF"
+  },
+  {
+    "slug": "adhi",
+    "name": "Adhi",
+    "category": "sannyasa",
+    "color": "#B99CDF"
+  },
+  {
+    "slug": "kala-sarpa",
+    "name": "Kala Sarpa",
+    "category": "shadow",
+    "color": "#B99CDF"
+  },
+  {
+    "slug": "shrapit",
+    "name": "Shrapit Dosha",
+    "category": "shadow",
+    "color": "#B99CDF"
+  },
+  {
+    "slug": "guru-chandala",
+    "name": "Guru Chandala",
+    "category": "shadow",
+    "color": "#B99CDF"
+  },
+  {
+    "slug": "angarak",
+    "name": "Angarak",
+    "category": "shadow",
+    "color": "#B99CDF"
+  },
+  {
+    "slug": "sarasvati",
+    "name": "Sarasvati",
+    "category": "nakshatra-yoga",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "sarasvati-moon",
+    "name": "Sarasvati (with Moon)",
+    "category": "nakshatra-yoga",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "parivartana",
+    "name": "Parivartana",
+    "category": "parivartana",
+    "color": "#5B8CFF"
+  },
+  {
+    "slug": "neecha-bhanga",
+    "name": "Neecha Bhanga Raja",
+    "category": "redemption",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "kemadruma-bhanga",
+    "name": "Kemadruma Bhanga",
+    "category": "redemption",
+    "color": "#D4B896"
+  },
+  {
+    "slug": "vipreet-redemption",
+    "name": "Vipreet (redemption)",
+    "category": "redemption",
+    "color": "#D4B896"
+  }
+]

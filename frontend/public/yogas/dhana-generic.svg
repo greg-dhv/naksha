@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Dhana (generic) yoga">
+  <title>Naksha · Dhana (generic)</title>
+  
+    <circle cx="8" cy="9" r="1" fill="#D4B896" opacity="1"></circle>
+    <circle cx="16" cy="9" r="1" fill="#D4B896" opacity="1"></circle>
+    <circle cx="8" cy="15" r="1" fill="#D4B896" opacity="1"></circle>
+    <circle cx="16" cy="15" r="1" fill="#D4B896" opacity="1"></circle>
+    <path d="M 8 9 L 16 9 L 16 15 L 8 15 Z" fill="none" stroke="#D4B896" stroke-width="0.4" opacity="0.45" stroke-dasharray="1 1"></path>
+    
+  <g opacity="0.95">
+    <circle cx="12" cy="12" r="0.7" fill="#D4B896"></circle>
+    <line x1="10.6" y1="12" x2="13.4" y2="12" stroke="#D4B896" stroke-width="0.4" opacity="0.6"></line>
+    <line x1="12" y1="10.6" x2="12" y2="13.4" stroke="#D4B896" stroke-width="0.4" opacity="0.6"></line>
+  </g>
+</svg>

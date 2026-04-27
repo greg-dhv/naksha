@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Chandra-Mangala yoga">
+  <title>Naksha · Chandra-Mangala</title>
+  
+    
+  
+  <g opacity="0.95">
+    <circle cx="11" cy="12" r="0.9" fill="#5B8CFF"></circle>
+    <line x1="9.2" y1="12" x2="12.8" y2="12" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+    <line x1="11" y1="10.2" x2="11" y2="13.8" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+  </g>
+  
+  <g opacity="0.95">
+    <circle cx="13.5" cy="12" r="0.7" fill="#5B8CFF"></circle>
+    <line x1="12.1" y1="12" x2="14.9" y2="12" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+    <line x1="13.5" y1="10.6" x2="13.5" y2="13.4" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+  </g>
+  <path d="M 11 12 L 13.5 12" stroke="#5B8CFF" stroke-width="0.4" opacity="0.4"></path>
+    <path d="M 8 8 Q 11 11 8 14" fill="none" stroke="#5B8CFF" stroke-width="0.6" opacity="0.7"></path>
+</svg>

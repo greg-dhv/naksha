@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="chitra nakshatra">
+  <title>Naksha · chitra</title>
+  <defs>
+    <radialGradient id="bg-14" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#162238" stop-opacity="0.9"></stop>
+      <stop offset="100%" stop-color="#0B1220" stop-opacity="1"></stop>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="url(#bg-14)" stroke="#D4B896" stroke-opacity="0.22" stroke-width="0.8"></circle>
+  <circle cx="32" cy="32" r="31" fill="none" stroke="#F2EBDA" stroke-opacity="0.04" stroke-width="0.4"></circle>
+  <circle cx="16.4" cy="35.5" r="0.4" fill="#F2EBDA" opacity="0.22"></circle><circle cx="21.0" cy="22.1" r="0.4" fill="#F2EBDA" opacity="0.14"></circle><circle cx="23.3" cy="10.7" r="0.4" fill="#F2EBDA" opacity="0.23"></circle><circle cx="46.3" cy="12.9" r="0.4" fill="#F2EBDA" opacity="0.18"></circle><circle cx="47.8" cy="58.8" r="0.4" fill="#F2EBDA" opacity="0.16"></circle><circle cx="18.5" cy="19.8" r="0.4" fill="#F2EBDA" opacity="0.12"></circle>
+  <circle cx="14" cy="10" r="0.9" fill="#F2EBDA" opacity="0.95"></circle>
+  
+    <g stroke="#D4B896" stroke-width="1.0" fill="none" stroke-linecap="round" opacity="0.9">
+      <circle cx="32" cy="44" r="6"></circle>
+      <circle cx="32" cy="44" r="9" stroke-dasharray="1 2" opacity="0.5"></circle>
+      <circle cx="29" cy="41" r="1.4" fill="#F2EBDA" stroke="none" opacity="0.8"></circle>
+    </g>
+</svg>

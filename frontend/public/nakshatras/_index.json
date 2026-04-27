@@ -1,0 +1,191 @@
+[
+  {
+    "n": 1,
+    "name": "ashwini",
+    "symbol": "horse-head",
+    "asterismStars": 3,
+    "slug": "01-ashwini"
+  },
+  {
+    "n": 2,
+    "name": "bharani",
+    "symbol": "yoni",
+    "asterismStars": 3,
+    "slug": "02-bharani"
+  },
+  {
+    "n": 3,
+    "name": "krittika",
+    "symbol": "razor",
+    "asterismStars": 6,
+    "slug": "03-krittika"
+  },
+  {
+    "n": 4,
+    "name": "rohini",
+    "symbol": "cart",
+    "asterismStars": 5,
+    "slug": "04-rohini"
+  },
+  {
+    "n": 5,
+    "name": "mrigashira",
+    "symbol": "deer-head",
+    "asterismStars": 3,
+    "slug": "05-mrigashira"
+  },
+  {
+    "n": 6,
+    "name": "ardra",
+    "symbol": "teardrop",
+    "asterismStars": 1,
+    "slug": "06-ardra"
+  },
+  {
+    "n": 7,
+    "name": "punarvasu",
+    "symbol": "bow-arrow",
+    "asterismStars": 5,
+    "slug": "07-punarvasu"
+  },
+  {
+    "n": 8,
+    "name": "pushya",
+    "symbol": "flower",
+    "asterismStars": 3,
+    "slug": "08-pushya"
+  },
+  {
+    "n": 9,
+    "name": "ashlesha",
+    "symbol": "serpent",
+    "asterismStars": 5,
+    "slug": "09-ashlesha"
+  },
+  {
+    "n": 10,
+    "name": "magha",
+    "symbol": "throne",
+    "asterismStars": 5,
+    "slug": "10-magha"
+  },
+  {
+    "n": 11,
+    "name": "purva-phalguni",
+    "symbol": "hammock",
+    "asterismStars": 2,
+    "slug": "11-purva-phalguni"
+  },
+  {
+    "n": 12,
+    "name": "uttara-phalguni",
+    "symbol": "bed",
+    "asterismStars": 2,
+    "slug": "12-uttara-phalguni"
+  },
+  {
+    "n": 13,
+    "name": "hasta",
+    "symbol": "hand",
+    "asterismStars": 5,
+    "slug": "13-hasta"
+  },
+  {
+    "n": 14,
+    "name": "chitra",
+    "symbol": "pearl",
+    "asterismStars": 1,
+    "slug": "14-chitra"
+  },
+  {
+    "n": 15,
+    "name": "swati",
+    "symbol": "shoot",
+    "asterismStars": 1,
+    "slug": "15-swati"
+  },
+  {
+    "n": 16,
+    "name": "vishakha",
+    "symbol": "arch",
+    "asterismStars": 4,
+    "slug": "16-vishakha"
+  },
+  {
+    "n": 17,
+    "name": "anuradha",
+    "symbol": "lotus",
+    "asterismStars": 4,
+    "slug": "17-anuradha"
+  },
+  {
+    "n": 18,
+    "name": "jyeshtha",
+    "symbol": "earring",
+    "asterismStars": 3,
+    "slug": "18-jyeshtha"
+  },
+  {
+    "n": 19,
+    "name": "mula",
+    "symbol": "roots",
+    "asterismStars": 11,
+    "slug": "19-mula"
+  },
+  {
+    "n": 20,
+    "name": "purva-ashadha",
+    "symbol": "fan",
+    "asterismStars": 2,
+    "slug": "20-purva-ashadha"
+  },
+  {
+    "n": 21,
+    "name": "uttara-ashadha",
+    "symbol": "tusk",
+    "asterismStars": 8,
+    "slug": "21-uttara-ashadha"
+  },
+  {
+    "n": 22,
+    "name": "shravana",
+    "symbol": "ear",
+    "asterismStars": 3,
+    "slug": "22-shravana"
+  },
+  {
+    "n": 23,
+    "name": "dhanishta",
+    "symbol": "drum",
+    "asterismStars": 4,
+    "slug": "23-dhanishta"
+  },
+  {
+    "n": 24,
+    "name": "shatabhisha",
+    "symbol": "circle",
+    "asterismStars": 100,
+    "slug": "24-shatabhisha"
+  },
+  {
+    "n": 25,
+    "name": "purva-bhadrapada",
+    "symbol": "sword",
+    "asterismStars": 2,
+    "slug": "25-purva-bhadrapada"
+  },
+  {
+    "n": 26,
+    "name": "uttara-bhadrapada",
+    "symbol": "twins",
+    "asterismStars": 2,
+    "slug": "26-uttara-bhadrapada"
+  },
+  {
+    "n": 27,
+    "name": "revati",
+    "symbol": "fish",
+    "asterismStars": 32,
+    "slug": "27-revati"
+  }
+]

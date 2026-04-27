@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-label="Love and Relationships">
+  <title>Naksha · Love &amp; Relationships</title>
+  <defs>
+    
+  <radialGradient id="a4a" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#5B8CFF" stop-opacity="0.18"></stop>
+    <stop offset="60%" stop-color="#5B8CFF" stop-opacity="0.045"></stop>
+    <stop offset="100%" stop-color="#5B8CFF" stop-opacity="0"></stop>
+  </radialGradient>
+    
+  <radialGradient id="a4b" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#B99CDF" stop-opacity="0.18"></stop>
+    <stop offset="60%" stop-color="#B99CDF" stop-opacity="0.045"></stop>
+    <stop offset="100%" stop-color="#B99CDF" stop-opacity="0"></stop>
+  </radialGradient>
+  </defs>
+  <rect width="480" height="360" fill="#0B1220"></rect><g><circle cx="103.39" cy="251.24" r="1.55" fill="#F2EBDA" opacity="0.369"></circle><circle cx="363.37" cy="246.23" r="1.02" fill="#F2EBDA" opacity="0.320"></circle><circle cx="383.39" cy="55.72" r="1.59" fill="#F2EBDA" opacity="0.135"></circle><circle cx="308.89" cy="63.15" r="1.14" fill="#F2EBDA" opacity="0.353"></circle><circle cx="9.20" cy="125.12" r="0.87" fill="#F2EBDA" opacity="0.280"></circle><circle cx="446.13" cy="218.94" r="1.27" fill="#F2EBDA" opacity="0.282"></circle><circle cx="462.46" cy="3.45" r="1.32" fill="#F2EBDA" opacity="0.374"></circle><circle cx="398.80" cy="229.98" r="1.14" fill="#F2EBDA" opacity="0.294"></circle><circle cx="109.78" cy="143.91" r="1.10" fill="#F2EBDA" opacity="0.306"></circle><circle cx="242.18" cy="40.85" r="1.37" fill="#F2EBDA" opacity="0.339"></circle><circle cx="399.76" cy="75.10" r="0.42" fill="#F2EBDA" opacity="0.246"></circle><circle cx="23.86" cy="9.59" r="0.99" fill="#F2EBDA" opacity="0.210"></circle><circle cx="92.47" cy="293.84" r="1.35" fill="#F2EBDA" opacity="0.246"></circle><circle cx="105.87" cy="340.19" r="1.20" fill="#F2EBDA" opacity="0.105"></circle><circle cx="49.11" cy="151.99" r="0.67" fill="#F2EBDA" opacity="0.239"></circle><circle cx="261.07" cy="108.27" r="0.46" fill="#F2EBDA" opacity="0.227"></circle><circle cx="456.26" cy="11.13" r="0.43" fill="#F2EBDA" opacity="0.127"></circle><circle cx="315.36" cy="214.56" r="0.90" fill="#F2EBDA" opacity="0.162"></circle><circle cx="351.83" cy="303.13" r="1.06" fill="#F2EBDA" opacity="0.254"></circle><circle cx="169.97" cy="326.41" r="0.68" fill="#F2EBDA" opacity="0.220"></circle><circle cx="280.20" cy="198.23" r="0.63" fill="#F2EBDA" opacity="0.206"></circle><circle cx="64.08" cy="209.20" r="1.56" fill="#F2EBDA" opacity="0.344"></circle><circle cx="191.17" cy="257.75" r="0.67" fill="#F2EBDA" opacity="0.292"></circle><circle cx="367.31" cy="127.85" r="0.76" fill="#F2EBDA" opacity="0.141"></circle><circle cx="20.61" cy="84.69" r="1.34" fill="#F2EBDA" opacity="0.353"></circle><circle cx="292.16" cy="290.25" r="0.73" fill="#F2EBDA" opacity="0.210"></circle><circle cx="391.27" cy="268.17" r="1.59" fill="#F2EBDA" opacity="0.339"></circle><circle cx="346.94" cy="36.81" r="0.63" fill="#F2EBDA" opacity="0.153"></circle></g>
+  <circle cx="175" cy="180" r="120" fill="url(#a4a)"></circle>
+  <circle cx="305" cy="180" r="120" fill="url(#a4b)"></circle>
+  <g><circle cx="175" cy="180" r="28" fill="none" stroke="#5B8CFF" stroke-width="0.8" opacity="0.55"></circle><circle cx="175" cy="180" r="52" fill="none" stroke="#5B8CFF" stroke-width="0.4" opacity="0.45"></circle><circle cx="175" cy="180" r="80" fill="none" stroke="#5B8CFF" stroke-width="0.4" opacity="0.35"></circle><circle cx="175" cy="180" r="110" fill="none" stroke="#5B8CFF" stroke-width="0.4" opacity="0.25"></circle><circle cx="175" cy="180" r="4.5" fill="#5B8CFF"></circle></g>
+  <g><circle cx="305" cy="180" r="28" fill="none" stroke="#B99CDF" stroke-width="0.8" opacity="0.55"></circle><circle cx="305" cy="180" r="52" fill="none" stroke="#B99CDF" stroke-width="0.4" opacity="0.45"></circle><circle cx="305" cy="180" r="80" fill="none" stroke="#B99CDF" stroke-width="0.4" opacity="0.35"></circle><circle cx="305" cy="180" r="110" fill="none" stroke="#B99CDF" stroke-width="0.4" opacity="0.25"></circle><circle cx="305" cy="180" r="4.5" fill="#B99CDF"></circle></g>
+  <line x1="175" y1="180" x2="305" y2="180" stroke="#D4B896" stroke-width="0.4" opacity="0.5" stroke-dasharray="1 2"></line>
+  <g transform="translate(240, 180)">
+    <circle r="18" fill="#D4B896" opacity="0.08"></circle>
+    <circle r="9" fill="#D4B896" opacity="0.16"></circle>
+    <circle r="2.6" fill="#F2EBDA"></circle>
+    <g stroke="#D4B896" stroke-width="0.4" opacity="0.5">
+      <line x1="-12" y1="0" x2="12" y2="0"></line>
+      <line x1="0" y1="-12" x2="0" y2="12"></line>
+    </g>
+  </g>
+  <ellipse cx="240" cy="180" rx="155" ry="92" fill="none" stroke="#D4B896" stroke-width="0.4" opacity="0.22" stroke-dasharray="2 5"></ellipse>
+</svg>

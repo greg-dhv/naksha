@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Raja (generic) yoga">
+  <title>Naksha · Raja (generic)</title>
+  
+    
+  <path d="M 12 4 L 20 18 L 4 18 Z" fill="none" stroke="#5B8CFF" stroke-width="0.5" opacity="0.45"></path>
+    
+  <g opacity="0.95">
+    <circle cx="12" cy="14" r="0.9" fill="#5B8CFF"></circle>
+    <line x1="10.2" y1="14" x2="13.8" y2="14" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+    <line x1="12" y1="12.2" x2="12" y2="15.8" stroke="#5B8CFF" stroke-width="0.4" opacity="0.6"></line>
+  </g>
+    <line x1="12" y1="6" x2="12" y2="13" stroke="#5B8CFF" stroke-width="0.4" opacity="0.5"></line>
+</svg>

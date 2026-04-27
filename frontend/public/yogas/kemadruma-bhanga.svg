@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Kemadruma Bhanga yoga">
+  <title>Naksha · Kemadruma Bhanga</title>
+  
+    
+  <g opacity="0.95">
+    <circle cx="12" cy="12" r="1.1" fill="#B99CDF"></circle>
+    <line x1="9.8" y1="12" x2="14.2" y2="12" stroke="#B99CDF" stroke-width="0.4" opacity="0.6"></line>
+    <line x1="12" y1="9.8" x2="12" y2="14.2" stroke="#B99CDF" stroke-width="0.4" opacity="0.6"></line>
+  </g>
+    <circle cx="12" cy="12" r="6" fill="none" stroke="#D4B896" stroke-width="0.5" opacity="0.7" stroke-dasharray="2 1"></circle>
+    <circle cx="6" cy="12" r="0.7" fill="#D4B896" opacity="0.9"></circle>
+    <circle cx="18" cy="12" r="0.7" fill="#D4B896" opacity="0.9"></circle>
+</svg>
