@@ -65,26 +65,28 @@ Return ONLY valid JSON (no markdown fences, no text outside the JSON object) wit
   "score": 75,
   "core_dynamic": "2-3 sentence paragraph capturing how these two energies meet — the vibe. Warm, direct, poetic. Use {name1} and {name2} by name.",
   "categories": [
-    {{"label": "{cat1}", "score": 80, "narrative": "1-2 sentences grounded in their specific planets — {cat1_hint}. Use their names."}},
-    {{"label": "{cat2}", "score": 70, "narrative": "1-2 sentences — {cat2_hint}. Use their names."}},
-    {{"label": "{cat3}", "score": 75, "narrative": "1-2 sentences — {cat3_hint}. Use their names."}},
-    {{"label": "{cat4}", "score": 55, "narrative": "1-2 sentences — {cat4_hint}. Use their names."}},
-    {{"label": "{cat5}", "score": 80, "narrative": "1-2 sentences — {cat5_hint}. Use their names."}}
+    {{"label": "{cat1}", "score": 80, "person1_context": "short phrase for {name1}: their key dasha or placement + 2-3 word quality (e.g. 'Moon Mahadasha · emotional openness')", "person2_context": "short phrase for {name2}: their key dasha or placement + 2-3 word quality", "chips": ["2-4 specific planets/nakshatras/dashas from either chart most relevant to this dimension, e.g. 'Moon · Scorpio H8' or 'Venus Mahadasha' or 'Rohini nakshatra'"], "narrative": "1-2 sentences grounded in their specific planets — {cat1_hint}. Describe the dynamic between them, not just each person individually."}},
+    {{"label": "{cat2}", "score": 70, "person1_context": "short phrase for {name1}", "person2_context": "short phrase for {name2}", "chips": ["2-4 relevant placements"], "narrative": "1-2 sentences — {cat2_hint}. Describe the dynamic."}},
+    {{"label": "{cat3}", "score": 75, "person1_context": "short phrase for {name1}", "person2_context": "short phrase for {name2}", "chips": ["2-4 relevant placements"], "narrative": "1-2 sentences — {cat3_hint}. Describe the dynamic."}},
+    {{"label": "{cat4}", "score": 55, "person1_context": "short phrase for {name1}", "person2_context": "short phrase for {name2}", "chips": ["2-4 relevant placements"], "narrative": "1-2 sentences — {cat4_hint}. Describe the dynamic."}},
+    {{"label": "{cat5}", "score": 80, "person1_context": "short phrase for {name1}", "person2_context": "short phrase for {name2}", "chips": ["2-4 relevant placements"], "narrative": "1-2 sentences — {cat5_hint}. Describe the dynamic."}}
   ],
-  "key_aspects": [
-    {{"aspect": "Specific aspect name (e.g. '{name1}'s Venus trines {name2}'s Mars')", "meaning": "Plain English: what this feels like in practice between them"}},
-    {{"aspect": "...", "meaning": "..."}},
-    {{"aspect": "...", "meaning": "..."}}
+  "flow_pairs": [
+    {{"gift": "One specific strength or natural gift in this connection — grounded in a real planetary dynamic, 8-15 words", "practice": "An imperative, concrete action they can take to use this gift well — starts with a verb, different angle from the gift, does NOT repeat the central noun or verb used in 'gift', 8-15 words"}},
+    {{"gift": "...", "practice": "..."}},
+    {{"gift": "...", "practice": "..."}},
+    {{"gift": "...", "practice": "..."}}
   ],
-  "strengths": ["What flows naturally — short evocative phrase", "...", "..."],
-  "growth_edges": ["Where they'll need to stretch — short phrase, generative not fatalistic", "...", "..."],
   "closing_question": "One open-ended question tailored to this specific pairing — a conversation-starter, not a test"
 }}
 
 Rules:
 - Replace example numbers with real assessed scores (average pairing = 60-70, strong = 75-85, rare = 88+)
 - Reference specific planetary positions from both charts — never generic statements
-- 3-5 key aspects, 3-5 strengths, 3-5 growth edges
+- Exactly 3-4 flow_pairs; each "practice" must be the direct action that deploys or honours the paired "gift" — not a separate topic
+- The "practice" half MUST NOT repeat the central noun or verb from the "gift" half — find a different angle, different vocabulary
+- Each half must be readable independently; the connection between them should be conceptual, not lexical
+- "practice" must use imperative mood and start with an action verb (e.g. "Name it early", "Let silences breathe", "Build rituals around")
 - Warm, precise, slightly poetic tone throughout
 - Never predict events — illuminate patterns and energies
 - Never use em-dashes (—), double hyphens (--), or standalone hyphens (-) as visual separators or list markers — write in natural prose only"""

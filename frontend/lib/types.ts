@@ -206,11 +206,14 @@ export interface BondCategory {
   label: string
   score: number
   narrative: string
+  person1_context?: string
+  person2_context?: string
+  chips?: string[]
 }
 
-export interface BondAspect {
-  aspect: string
-  meaning: string
+export interface FlowPair {
+  gift: string
+  practice: string
 }
 
 export interface BondReport {
@@ -219,9 +222,7 @@ export interface BondReport {
   score: number
   core_dynamic: string
   categories: BondCategory[]
-  key_aspects: BondAspect[]
-  strengths: string[]
-  growth_edges: string[]
+  flow_pairs: FlowPair[]
   closing_question: string
 }
 

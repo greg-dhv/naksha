@@ -4,25 +4,184 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import AppShell from '@/components/AppShell'
 import { searchUsers, getCompatibility, listBonds } from '@/lib/api'
-import { UserSearchResult, BondResult, BondReport } from '@/lib/types'
+import { UserSearchResult, BondResult, BondReport, BondCategory } from '@/lib/types'
 
 type RelType = 'friendship' | 'relationship'
 
-function LeadText({ text, fontSize = '15px', lineHeight = 1.85 }: { text: string; fontSize?: string; lineHeight?: number }) {
-  const match = text.match(/^(.*?[.!?])\s*([\s\S]*)$/)
-  if (!match) {
-    return (
-      <p style={{ fontFamily: 'var(--font-sans)', fontSize, color: 'var(--nk-text)', lineHeight, fontWeight: 300, margin: 0 }}>
-        {text}
-      </p>
-    )
+// Collapsible reading card — same pattern as ReadingCard in chart page
+function BondReadingCard({ label, text, accent = 'var(--nk-primary)' }: { label: string; text: string; accent?: string }) {
+  const [expanded, setExpanded] = useState(false)
+
+  let headline = text
+  let body = ''
+  const m = text.match(/^(.+?[.!?])\s+([A-Z].+)$/s)
+  if (m) {
+    headline = m[1]
+    body = m[2]
+  } else {
+    const cut = text.lastIndexOf(' ', 160)
+    if (cut > 60) {
+      headline = text.slice(0, cut) + '…'
+      body = text
+    }
   }
-  const [, first, rest] = match
+  const hasBody = !!body
+
   return (
-    <p style={{ fontFamily: 'var(--font-sans)', fontSize, color: 'var(--nk-text)', lineHeight, fontWeight: 300, margin: 0 }}>
-      <span style={{ fontWeight: 600 }}>{first}</span>
-      {rest && ` ${rest}`}
-    </p>
+    <div
+      onClick={() => hasBody && setExpanded(e => !e)}
+      style={{
+        background: 'var(--nk-surface)',
+        border: '1px solid var(--nk-border)',
+        borderRadius: 'var(--nk-r-lg)',
+        padding: '20px',
+        boxShadow: 'var(--nk-shadow-sm)',
+        cursor: hasBody ? 'pointer' : 'default',
+        transition: 'border-color var(--dur-fast)',
+      }}
+      onMouseEnter={e => { if (hasBody) (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.18)' }}
+      onMouseLeave={e => { if (hasBody) (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.08)' }}
+    >
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: accent, marginBottom: '12px' }}>
+        {label}
+      </p>
+      <p style={{ fontFamily: 'var(--font-sans)', fontSize: 'clamp(16px, 3vw, 19px)', fontWeight: 400, color: 'var(--nk-text)', lineHeight: 1.65, marginBottom: hasBody ? '10px' : 0 }}>
+        {headline}
+      </p>
+      {expanded && body && (
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '15px', color: 'var(--nk-text-2)', lineHeight: 1.75, marginBottom: '10px' }}>
+          {body}
+        </p>
+      )}
+      {hasBody && (
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '0.08em', color: accent, opacity: 0.75 }}>
+          {expanded ? '↑ Less' : 'Read more ↓'}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// Single collapsible dimension row with optional synastry comparison view
+function DimensionRow({ cat, person1Name, person2Name, isOpen, onToggle }: {
+  cat: BondCategory
+  person1Name: string
+  person2Name: string
+  isOpen: boolean
+  onToggle: () => void
+}) {
+  const hasSynastry = !!(cat.person1_context && cat.person2_context)
+  const scoreOpacity = cat.score >= 80 ? 1 : cat.score >= 60 ? 0.65 : 0.35
+
+  return (
+    <div
+      onClick={onToggle}
+      style={{
+        background: isOpen ? 'rgba(91,140,255,0.05)' : 'var(--nk-surface)',
+        border: `1px solid ${isOpen ? 'rgba(91,140,255,0.22)' : 'var(--nk-border)'}`,
+        borderRadius: 'var(--nk-r-md)',
+        padding: '14px 16px',
+        cursor: 'pointer',
+        transition: 'all var(--dur-fast)',
+      }}
+    >
+      {/* Header row — always visible */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <span style={{
+          fontFamily: 'var(--font-sans)', fontSize: '12px', letterSpacing: '0.04em',
+          color: isOpen ? 'var(--nk-text)' : 'var(--nk-text-2)', fontWeight: isOpen ? 500 : 400,
+          flex: 1,
+        }}>
+          {cat.label}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: 'var(--nk-primary)' }}>
+            {cat.score}
+          </span>
+          <span style={{
+            fontSize: '10px', color: 'var(--nk-text-4)',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform var(--dur-fast)',
+            display: 'inline-block',
+          }}>
+            ▾
+          </span>
+        </div>
+      </div>
+
+      {/* Score bar — always visible */}
+      <div style={{ width: '100%', height: '2px', background: 'var(--nk-border)', borderRadius: '2px', marginTop: '8px' }}>
+        <div style={{
+          width: `${cat.score}%`, height: '100%',
+          background: `rgba(91,140,255,${scoreOpacity})`,
+          borderRadius: '2px', transition: 'width 0.8s ease',
+        }} />
+      </div>
+
+      {/* Expanded: synastry comparison + narrative */}
+      {isOpen && (
+        <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--nk-border)' }}
+          onClick={e => e.stopPropagation()}
+        >
+          {hasSynastry && (
+            <div style={{ marginBottom: '14px' }}>
+              {/* Two-column comparison */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--nk-border-hair)',
+                  borderRadius: 'var(--nk-r-sm)',
+                  padding: '12px',
+                }}>
+                  <p style={{
+                    fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.14em',
+                    textTransform: 'uppercase', color: 'var(--nk-text-4)', marginBottom: '6px',
+                  }}>
+                    {person1Name}
+                  </p>
+                  <p style={{
+                    fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'var(--nk-text-2)', lineHeight: 1.55,
+                  }}>
+                    {cat.person1_context}
+                  </p>
+                </div>
+                <div style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--nk-border-hair)',
+                  borderRadius: 'var(--nk-r-sm)',
+                  padding: '12px',
+                }}>
+                  <p style={{
+                    fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.14em',
+                    textTransform: 'uppercase', color: 'var(--nk-text-4)', marginBottom: '6px',
+                  }}>
+                    {person2Name}
+                  </p>
+                  <p style={{
+                    fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'var(--nk-text-2)', lineHeight: 1.55,
+                  }}>
+                    {cat.person2_context}
+                  </p>
+                </div>
+              </div>
+              {/* The dynamic label */}
+              <p style={{
+                fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.14em',
+                textTransform: 'uppercase', color: 'var(--nk-text-4)', textAlign: 'center', marginBottom: '8px',
+              }}>
+                ↓ the dynamic ↓
+              </p>
+            </div>
+          )}
+          <p style={{
+            fontFamily: 'var(--font-sans)', fontSize: '13px',
+            fontWeight: 300, color: 'var(--nk-text-2)', lineHeight: 1.75,
+          }}>
+            {cat.narrative}
+          </p>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -50,15 +209,40 @@ function ScoreRing({ score }: { score: number }) {
   )
 }
 
-function ScoreBar({ score }: { score: number }) {
-  const opacity = score >= 80 ? 1 : score >= 60 ? 0.65 : 0.35
+
+function DimensionsCard({ categories, label, person1Name, person2Name }: {
+  categories: BondCategory[]
+  label: string
+  person1Name: string
+  person2Name: string
+}) {
+  const [openIdx, setOpenIdx] = useState<number | null>(0)
+
   return (
-    <div style={{ width: '100%', height: '3px', background: 'var(--nk-border)', borderRadius: '2px', marginTop: '8px', marginBottom: '10px' }}>
-      <div style={{
-        width: `${score}%`, height: '100%',
-        background: `rgba(91,140,255,${opacity})`,
-        borderRadius: '2px', transition: 'width 0.8s ease',
-      }} />
+    <div style={{
+      background: 'var(--nk-surface)', border: '1px solid var(--nk-border)',
+      borderRadius: 'var(--nk-r-lg)', padding: '22px',
+      marginBottom: '10px', boxShadow: 'var(--nk-shadow-sm)',
+    }}>
+      <p style={{
+        fontFamily: 'var(--font-sans)', fontSize: '10px',
+        letterSpacing: '0.2em', textTransform: 'uppercase',
+        color: 'var(--nk-primary)', marginBottom: '14px',
+      }}>
+        {label}
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {categories.map((cat, i) => (
+          <DimensionRow
+            key={i}
+            cat={cat}
+            person1Name={person1Name}
+            person2Name={person2Name}
+            isOpen={openIdx === i}
+            onToggle={() => setOpenIdx(openIdx === i ? null : i)}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -124,160 +308,103 @@ function BondReportView({ bond, onReset }: { bond: BondResult; onReset: () => vo
       </div>
 
       {/* Core dynamic */}
-      <div style={{
-        background: 'var(--nk-surface)', border: '1px solid var(--nk-border)',
-        borderRadius: 'var(--nk-r-lg)', padding: '22px',
-        marginBottom: '10px', boxShadow: 'var(--nk-shadow-sm)',
-      }}>
-        <p style={{
-          fontFamily: 'var(--font-sans)', fontSize: '10px',
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          color: 'var(--nk-primary)', marginBottom: '14px',
-        }}>
-          Core dynamic
-        </p>
-        <LeadText text={r.core_dynamic} fontSize="clamp(14px, 2.5vw, 15px)" lineHeight={1.85} />
+      <div style={{ marginBottom: '10px' }}>
+        <BondReadingCard label="Core dynamic" text={r.core_dynamic} />
       </div>
 
       {/* Category breakdown */}
-      <div style={{
-        background: 'var(--nk-surface)', border: '1px solid var(--nk-border)',
-        borderRadius: 'var(--nk-r-lg)', padding: '22px',
-        marginBottom: '10px', boxShadow: 'var(--nk-shadow-sm)',
-      }}>
-        <p style={{
-          fontFamily: 'var(--font-sans)', fontSize: '10px',
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          color: 'var(--nk-primary)', marginBottom: '20px',
-        }}>
-          {bond.relationship_type === 'friendship' ? 'Friendship dimensions' : 'Relationship dimensions'}
-        </p>
-        {r.categories.map((cat, i) => (
-          <div key={i} style={{ marginBottom: i < r.categories.length - 1 ? '20px' : 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span style={{
-                fontFamily: 'var(--font-sans)', fontSize: '12px',
-                color: 'var(--nk-text-2)', letterSpacing: '0.04em',
-              }}>
-                {cat.label}
-              </span>
-              <span style={{
-                fontFamily: 'var(--font-sans)', fontSize: '11px',
-                color: 'var(--nk-primary)',
-              }}>
-                {cat.score}
-              </span>
-            </div>
-            <ScoreBar score={cat.score} />
-            <p style={{
-              fontFamily: 'var(--font-sans)', fontSize: '13px',
-              fontWeight: 300, color: 'var(--nk-text-2)', lineHeight: 1.75, margin: 0,
-            }}>
-              {cat.narrative}
-            </p>
-          </div>
-        ))}
-      </div>
+      <DimensionsCard
+        categories={r.categories}
+        label={bond.relationship_type === 'friendship' ? 'Friendship dimensions' : 'Relationship dimensions'}
+        person1Name={bond.person1.name || bond.person1.username}
+        person2Name={bond.person2.name || bond.person2.username}
+      />
 
-      {/* Key aspects */}
-      <div style={{
-        background: 'var(--nk-surface)', border: '1px solid var(--nk-border)',
-        borderRadius: 'var(--nk-r-lg)', padding: '22px',
-        marginBottom: '10px', boxShadow: 'var(--nk-shadow-sm)',
-      }}>
-        <p style={{
-          fontFamily: 'var(--font-sans)', fontSize: '10px',
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          color: 'var(--nk-primary)', marginBottom: '16px',
+      {/* Flow pairs */}
+      {r.flow_pairs && r.flow_pairs.length > 0 && (
+        <div style={{
+          background: 'var(--nk-surface)', border: '1px solid var(--nk-border)',
+          borderRadius: 'var(--nk-r-lg)', padding: '22px',
+          marginBottom: '10px', boxShadow: 'var(--nk-shadow-sm)',
         }}>
-          Key aspects
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-          {r.key_aspects.map((a, i) => (
-            <div key={i} style={{
-              background: 'var(--nk-surface-2)',
-              border: '1px solid var(--nk-border)',
-              borderTop: '2px solid var(--nk-primary-line)',
-              borderRadius: 'var(--nk-r-sm)',
-              padding: '14px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
+          <p style={{
+            fontFamily: 'var(--font-sans)', fontSize: '10px',
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'var(--nk-primary)', marginBottom: '16px',
+          }}>
+            You have · Use it for
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {r.flow_pairs.map((pair, i) => (
+              <div key={i}>
                 <div style={{
-                  width: '5px', height: '5px', borderRadius: '50%',
-                  background: 'var(--nk-primary)', flexShrink: 0, marginTop: '5px',
-                  boxShadow: '0 0 6px rgba(91,140,255,0.5)',
-                }} />
-                <p style={{
-                  fontFamily: 'var(--font-sans)', fontSize: '13px',
-                  fontWeight: 600, color: 'var(--nk-text)', lineHeight: 1.3, margin: 0,
+                  fontFamily: 'var(--font-sans)', fontSize: '9px',
+                  letterSpacing: '0.12em', color: 'var(--nk-text-4)',
+                  marginBottom: '6px', paddingLeft: '2px',
                 }}>
-                  {a.aspect}
-                </p>
-              </div>
-              <p style={{
-                fontFamily: 'var(--font-sans)', fontSize: '11px',
-                fontWeight: 300, color: 'var(--nk-text-2)', lineHeight: 1.65, margin: 0,
-              }}>
-                {a.meaning}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'stretch', gap: '6px' }}>
+                  {/* Gift */}
+                  <div style={{
+                    flex: 1, minWidth: '100px',
+                    background: 'rgba(126,200,160,0.07)',
+                    border: '1px solid rgba(126,200,160,0.18)',
+                    borderRadius: 'var(--nk-r-sm)',
+                    padding: '12px',
+                  }}>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)', fontSize: '9px',
+                      letterSpacing: '0.14em', textTransform: 'uppercase',
+                      color: 'var(--nk-success)', marginBottom: '5px', opacity: 0.8,
+                    }}>
+                      You have
+                    </p>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)', fontSize: '13px',
+                      color: 'var(--nk-text)', lineHeight: 1.55, margin: 0,
+                    }}>
+                      {pair.gift}
+                    </p>
+                  </div>
 
-      {/* Strengths / Growth edges */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-        <div style={{
-          background: 'rgba(126,200,160,0.06)', border: '1px solid rgba(126,200,160,0.2)',
-          borderRadius: 'var(--nk-r-lg)', padding: '18px',
-        }}>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: '10px',
-            letterSpacing: '0.2em', textTransform: 'uppercase',
-            color: 'var(--nk-success)', marginBottom: '14px',
-          }}>
-            What flows
-          </p>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {r.strengths.map((s, i) => (
-              <li key={i} style={{
-                fontFamily: 'var(--font-sans)', fontSize: '13px', fontWeight: 300,
-                color: 'var(--nk-text-2)', lineHeight: 1.65,
-                marginBottom: i < r.strengths.length - 1 ? '8px' : 0,
-                paddingLeft: '14px', position: 'relative',
-              }}>
-                <span style={{ position: 'absolute', left: 0, color: 'var(--nk-success)' }}>·</span>
-                {s}
-              </li>
+                  {/* Arrow */}
+                  <div style={{
+                    flexShrink: 0, width: '20px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--nk-text-4)', fontSize: '11px',
+                  }}>
+                    →
+                  </div>
+
+                  {/* Practice */}
+                  <div style={{
+                    flex: 1, minWidth: '100px',
+                    background: 'rgba(240,184,96,0.06)',
+                    border: '1px solid rgba(240,184,96,0.18)',
+                    borderRadius: 'var(--nk-r-sm)',
+                    padding: '12px',
+                  }}>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)', fontSize: '9px',
+                      letterSpacing: '0.14em', textTransform: 'uppercase',
+                      color: 'var(--nk-warning)', marginBottom: '5px', opacity: 0.8,
+                    }}>
+                      The practice
+                    </p>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)', fontSize: '13px',
+                      color: 'var(--nk-text-2)', lineHeight: 1.55, margin: 0,
+                    }}>
+                      {pair.practice}
+                    </p>
+                  </div>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
-        <div style={{
-          background: 'rgba(240,184,96,0.06)', border: '1px solid rgba(240,184,96,0.2)',
-          borderRadius: 'var(--nk-r-lg)', padding: '18px',
-        }}>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: '10px',
-            letterSpacing: '0.2em', textTransform: 'uppercase',
-            color: 'var(--nk-warning)', marginBottom: '14px',
-          }}>
-            Growth edges
-          </p>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {r.growth_edges.map((g, i) => (
-              <li key={i} style={{
-                fontFamily: 'var(--font-sans)', fontSize: '13px', fontWeight: 300,
-                color: 'var(--nk-text-2)', lineHeight: 1.65,
-                marginBottom: i < r.growth_edges.length - 1 ? '8px' : 0,
-                paddingLeft: '14px', position: 'relative',
-              }}>
-                <span style={{ position: 'absolute', left: 0, color: 'var(--nk-warning)' }}>·</span>
-                {g}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      )}
 
       {/* Explore another bond CTA */}
       <div style={{
