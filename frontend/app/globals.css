@@ -114,15 +114,19 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 40;
+  z-index: 9999;
   height: 64px;
   padding-bottom: env(safe-area-inset-bottom);
-  background: rgba(7,12,22,0.97);
+  background: rgba(7,12,22,0.98);
   border-top: 1px solid var(--nk-border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
+  /* Force GPU compositing layer — keeps nav above scrolling content on iOS Safari */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  isolation: isolate;
 }
 
 /* Desktop: sidebar layout */
