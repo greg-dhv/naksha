@@ -224,8 +224,8 @@ export default function OnboardingPage() {
           />
         </svg>
 
-        {/* Phase text */}
-        <div style={{ marginTop: '52px', textAlign: 'center' }}>
+        {/* Phase text — fixed height prevents illustration from shifting */}
+        <div style={{ marginTop: '52px', textAlign: 'center', width: '100%', maxWidth: '320px' }}>
           <p style={{
             fontFamily: 'var(--font-sans)', fontSize: '10px',
             letterSpacing: '0.28em', textTransform: 'uppercase',
@@ -234,22 +234,26 @@ export default function OnboardingPage() {
           }}>
             Mapping your Naksha
           </p>
-          <div className={`nk-phase-text ${phaseVisible ? 'visible' : 'hidden'}`}>
-            <p style={{
-              fontFamily: 'var(--font-sans)', fontSize: '10px',
-              letterSpacing: '0.2em', textTransform: 'uppercase',
-              color: 'rgba(212,184,150,0.55)',
-              marginBottom: '8px',
-            }}>
-              {LOADING_PHASES[loadingPhase].label}
-            </p>
-            <p style={{
-              fontFamily: 'var(--font-sans)', fontSize: '16px',
-              fontWeight: 300, letterSpacing: '0.01em',
-              color: 'rgba(245,247,251,0.42)',
-            }}>
-              {LOADING_PHASES[loadingPhase].text}
-            </p>
+          {/* Fixed height so text changes never shift the illustration above */}
+          <div style={{ height: '52px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div className={`nk-phase-text ${phaseVisible ? 'visible' : 'hidden'}`}>
+              <p style={{
+                fontFamily: 'var(--font-sans)', fontSize: '10px',
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                color: 'rgba(212,184,150,0.55)',
+                marginBottom: '8px',
+              }}>
+                {LOADING_PHASES[loadingPhase].label}
+              </p>
+              <p style={{
+                fontFamily: 'var(--font-sans)', fontSize: '16px',
+                fontWeight: 300, letterSpacing: '0.01em',
+                color: 'rgba(245,247,251,0.42)',
+                whiteSpace: 'nowrap',
+              }}>
+                {LOADING_PHASES[loadingPhase].text}
+              </p>
+            </div>
           </div>
         </div>
       </main>
