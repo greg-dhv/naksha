@@ -419,18 +419,23 @@ function ChartStandout({ items, chart, onGoDeeper }: {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         paddingTop: '12px', borderTop: '1px solid var(--nk-border)',
       }}>
-        <div style={{ display: 'flex', gap: '7px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
           {items.map((_, i) => (
             <button key={i} onClick={() => setActive(i)} style={{
-              width: i === active ? '18px' : '6px',
-              height: '6px',
-              borderRadius: '3px',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-              background: i === active ? accentColor : 'rgba(255,255,255,0.18)',
-              transition: 'all var(--dur-normal)',
-            }} />
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: '44px', height: '44px',
+              background: 'none', border: 'none',
+              cursor: 'pointer', padding: 0, flexShrink: 0,
+            }}>
+              <span style={{
+                display: 'block',
+                width: i === active ? '18px' : '6px',
+                height: '6px',
+                borderRadius: '3px',
+                background: i === active ? accentColor : 'rgba(255,255,255,0.18)',
+                transition: 'all var(--dur-normal)',
+              }} />
+            </button>
           ))}
         </div>
         <button onClick={() => onGoDeeper('chart-stands-out')} style={{
@@ -673,6 +678,27 @@ function PathSection({ data, onGoDeeper }: { data: ChartResponse; onGoDeeper: (f
         <SoulThemesGrid themes={soul.soul_themes} />
       )}
 
+      {/* Timeline divider — past → present */}
+      {soul?.soul_themes && soul.soul_themes.length > 0 && growth?.what_to_create && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px',
+          padding: '8px 0',
+        }}>
+          <div style={{ flex: 1, height: '1px', background: `linear-gradient(to right, transparent, ${SECTION_ACCENT.path}30)` }} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+            <span style={{ fontSize: '14px', color: SECTION_ACCENT.path, opacity: 0.5, lineHeight: 1 }}>✦</span>
+            <span style={{
+              fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.18em',
+              textTransform: 'uppercase', color: SECTION_ACCENT.path, opacity: 0.45,
+              whiteSpace: 'nowrap',
+            }}>
+              from past · to now
+            </span>
+          </div>
+          <div style={{ flex: 1, height: '1px', background: `linear-gradient(to left, transparent, ${SECTION_ACCENT.path}30)` }} />
+        </div>
+      )}
+
       {/* What to create */}
       {growth?.what_to_create && (
         <ReadingCard
@@ -712,74 +738,144 @@ const PAST_LIFE_LABEL_COLORS = [
 ]
 
 function SoulThemesGrid({ themes }: { themes: SoulTheme[] }) {
+  const [expandedIdx, setExpandedIdx] = useState<number>(0)
+  const accent = SECTION_ACCENT.path
+
+  const PastLifeLabels = ({ labels }: { labels: string[] }) => (
+    <div style={{
+      display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center',
+    }}>
+      <span style={{
+        fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.14em',
+        textTransform: 'uppercase', color: 'var(--nk-text-3)', marginRight: '2px',
+      }}>
+        Past life echoes
+      </span>
+      {labels.map((label, j) => {
+        const c = PAST_LIFE_LABEL_COLORS[j % PAST_LIFE_LABEL_COLORS.length]
+        return (
+          <span key={j} style={{
+            fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.06em',
+            padding: '3px 10px', borderRadius: '20px',
+            background: c.bg, border: `1px solid ${c.border}`, color: c.text,
+          }}>
+            {label}
+          </span>
+        )
+      })}
+    </div>
+  )
+
   return (
     <div>
       <p style={{
         fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.18em',
-        textTransform: 'uppercase', color: SECTION_ACCENT.path, marginBottom: '10px',
+        textTransform: 'uppercase', color: accent, marginBottom: '10px',
       }}>
         What your soul already knows
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {themes.map((t, i) => (
-          <div key={i} style={{
-            background: 'rgba(160,196,232,0.06)',
-            border: '1px solid rgba(160,196,232,0.15)',
-            borderRadius: 'var(--nk-r-md)', padding: '14px 16px',
-          }}>
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: t.past_life_labels?.length ? '12px' : 0 }}>
-              <span style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: '22px', color: SECTION_ACCENT.path, opacity: 0.6,
-                lineHeight: 1, flexShrink: 0, marginTop: '2px',
+        {themes.map((t, i) => {
+          const isOpen = expandedIdx === i
+          const hasPastLife = t.past_life_labels && t.past_life_labels.length > 0
+
+          if (i === 0) {
+            // First theme — always expanded, not collapsible
+            return (
+              <div key={i} style={{
+                background: `${accent}0d`,
+                border: `1px solid ${accent}30`,
+                borderRadius: 'var(--nk-r-lg)', padding: '20px',
               }}>
-                {i + 1}
-              </span>
-              <div>
-                <p style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '17px', fontWeight: 500, color: 'var(--nk-text)', marginBottom: '4px',
+                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: hasPastLife ? '14px' : 0 }}>
+                  <span style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '22px', color: accent, opacity: 0.6,
+                    lineHeight: 1, flexShrink: 0, marginTop: '2px',
+                  }}>
+                    1
+                  </span>
+                  <div>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '17px', fontWeight: 500, color: 'var(--nk-text)', marginBottom: '6px',
+                    }}>
+                      {t.theme}
+                    </p>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)', fontSize: '14px',
+                      color: 'var(--nk-text-2)', lineHeight: 1.65,
+                    }}>
+                      {t.description}
+                    </p>
+                  </div>
+                </div>
+                {hasPastLife && (
+                  <div style={{ paddingTop: '12px', borderTop: `1px solid ${accent}18` }}>
+                    <PastLifeLabels labels={t.past_life_labels!} />
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          // Remaining themes — collapsible
+          return (
+            <button
+              key={i}
+              onClick={() => setExpandedIdx(isOpen ? -1 : i)}
+              style={{
+                textAlign: 'left', cursor: 'pointer',
+                background: isOpen ? `${accent}0a` : 'var(--nk-surface)',
+                border: `1px solid ${isOpen ? accent + '28' : 'var(--nk-border)'}`,
+                borderRadius: 'var(--nk-r-md)',
+                padding: '14px 16px',
+                transition: 'all var(--dur-fast)',
+              }}
+            >
+              {/* Header row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{
+                  fontFamily: 'var(--font-sans)', fontSize: '14px',
+                  color: accent, opacity: 0.6, flexShrink: 0, width: '18px',
                 }}>
+                  {i + 1}
+                </span>
+                <p style={{ flex: 1, fontFamily: 'var(--font-sans)', fontSize: '15px', fontWeight: 500, color: 'var(--nk-text)' }}>
                   {t.theme}
                 </p>
-                <p style={{
-                  fontFamily: 'var(--font-sans)', fontSize: '12px',
-                  color: 'var(--nk-text-2)', lineHeight: 1.65,
-                }}>
-                  {t.description}
-                </p>
-              </div>
-            </div>
-
-            {/* Past life labels */}
-            {t.past_life_labels && t.past_life_labels.length > 0 && (
-              <div style={{
-                paddingTop: '10px',
-                borderTop: '1px solid rgba(160,196,232,0.12)',
-                display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center',
-              }}>
                 <span style={{
-                  fontFamily: 'var(--font-sans)', fontSize: '9px', letterSpacing: '0.14em',
-                  textTransform: 'uppercase', color: 'var(--nk-text-3)', marginRight: '2px',
+                  fontSize: '10px', color: 'var(--nk-text-3)',
+                  transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform var(--dur-fast)',
+                  display: 'inline-block', flexShrink: 0,
                 }}>
-                  Past life echoes
+                  ▾
                 </span>
-                {t.past_life_labels.map((label, j) => {
-                  const c = PAST_LIFE_LABEL_COLORS[j % PAST_LIFE_LABEL_COLORS.length]
-                  return (
-                    <span key={j} style={{
-                      fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.06em',
-                      padding: '3px 10px', borderRadius: '20px',
-                      background: c.bg, border: `1px solid ${c.border}`, color: c.text,
-                    }}>
-                      {label}
-                    </span>
-                  )
-                })}
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* Past life echoes always visible in collapsed state */}
+              {hasPastLife && !isOpen && (
+                <div style={{ marginTop: '10px', paddingLeft: '30px' }}>
+                  <PastLifeLabels labels={t.past_life_labels!} />
+                </div>
+              )}
+
+              {/* Expanded body */}
+              {isOpen && (
+                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${accent}18` }}>
+                  <p style={{
+                    fontFamily: 'var(--font-sans)', fontSize: '14px',
+                    color: 'var(--nk-text-2)', lineHeight: 1.65, marginBottom: hasPastLife ? '12px' : 0,
+                  }}>
+                    {t.description}
+                  </p>
+                  {hasPastLife && <PastLifeLabels labels={t.past_life_labels!} />}
+                </div>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

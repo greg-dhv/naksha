@@ -52,7 +52,7 @@ Respond ONLY with valid JSON (no markdown, no code fences), using this exact str
     }}
   ],
   "carry_label": "Choose exactly ONE of: 'A question to sit with' or 'This week's word' or 'A practice' or 'Watch for this'",
-  "carry_text": "One specific thing to carry through the week. A question, a theme word, a brief practice, or a single astrological event to notice. Explain briefly why this matters for them right now. 1 to 2 sentences max.",
+  "carry_text": "One specific thing to carry through the week. A question, a theme word, a brief practice, or a single astrological event to notice. One sentence only. No explanation — just the question or thing itself.",
   "cycle_insight": "1 to 2 sentences on why this specific combination of planetary periods creates the quality of this week. Use plain language first, then name the planets."
 }}
 

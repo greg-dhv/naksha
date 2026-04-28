@@ -185,6 +185,182 @@ function DimensionRow({ cat, person1Name, person2Name, isOpen, onToggle }: {
   )
 }
 
+function BondLoader({ name1, name2 }: { name1: string; name2: string }) {
+  const [phraseIdx, setPhraseIdx] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  const phrases = [
+    'Reading the karmic threads…',
+    'Mapping the orbital resonance…',
+    'Tracing the dasha cycles…',
+    'Aligning the nakshatras…',
+    'Weaving the bond archetype…',
+    'Consulting the planets…',
+  ]
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setPhraseIdx(i => (i + 1) % phrases.length)
+        setVisible(true)
+      }, 350)
+    }, 2800)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', minHeight: '65vh', gap: '28px', padding: '40px 20px',
+    }}>
+      <style>{`
+        @keyframes nk-ellipse-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+      `}</style>
+
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360"
+        style={{ width: '100%', maxWidth: '320px', height: 'auto' }}>
+        <defs>
+          <radialGradient id="bl-a" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#5B8CFF" stopOpacity="0.18" />
+            <stop offset="60%" stopColor="#5B8CFF" stopOpacity="0.045" />
+            <stop offset="100%" stopColor="#5B8CFF" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="bl-b" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#B99CDF" stopOpacity="0.18" />
+            <stop offset="60%" stopColor="#B99CDF" stopOpacity="0.045" />
+            <stop offset="100%" stopColor="#B99CDF" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        <rect width="480" height="360" fill="#0B1220" />
+
+        {/* Static stars */}
+        <g>
+          <circle cx="103" cy="251" r="1.55" fill="#F2EBDA" opacity="0.37" />
+          <circle cx="363" cy="246" r="1.02" fill="#F2EBDA" opacity="0.32" />
+          <circle cx="383" cy="55"  r="1.59" fill="#F2EBDA" opacity="0.14" />
+          <circle cx="308" cy="63"  r="1.14" fill="#F2EBDA" opacity="0.35" />
+          <circle cx="446" cy="218" r="1.27" fill="#F2EBDA" opacity="0.28" />
+          <circle cx="462" cy="3"   r="1.32" fill="#F2EBDA" opacity="0.37" />
+          <circle cx="398" cy="229" r="1.14" fill="#F2EBDA" opacity="0.29" />
+          <circle cx="109" cy="143" r="1.10" fill="#F2EBDA" opacity="0.31" />
+          <circle cx="242" cy="40"  r="1.37" fill="#F2EBDA" opacity="0.34" />
+          <circle cx="64"  cy="209" r="1.56" fill="#F2EBDA" opacity="0.34" />
+          <circle cx="20"  cy="84"  r="1.34" fill="#F2EBDA" opacity="0.35" />
+          <circle cx="391" cy="268" r="1.59" fill="#F2EBDA" opacity="0.34" />
+          <circle cx="92"  cy="293" r="1.35" fill="#F2EBDA" opacity="0.25" />
+        </g>
+
+        {/* Blue glow — breathing */}
+        <circle cx="175" cy="180" r="120" fill="url(#bl-a)">
+          <animate attributeName="opacity" values="1;1.8;1" dur="3.5s" repeatCount="indefinite" />
+        </circle>
+
+        {/* Purple glow — breathing, offset */}
+        <circle cx="305" cy="180" r="120" fill="url(#bl-b)">
+          <animate attributeName="opacity" values="1;1.8;1" dur="4s" begin="-1.5s" repeatCount="indefinite" />
+        </circle>
+
+        {/* Blue orbital rings */}
+        <g>
+          <circle cx="175" cy="180" r="28" fill="none" stroke="#5B8CFF" strokeWidth="0.8" opacity="0.55">
+            <animate attributeName="opacity" values="0.55;0.15;0.55" dur="3s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="175" cy="180" r="52" fill="none" stroke="#5B8CFF" strokeWidth="0.4" opacity="0.45">
+            <animate attributeName="opacity" values="0.45;0.12;0.45" dur="3s" begin="-0.5s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="175" cy="180" r="80" fill="none" stroke="#5B8CFF" strokeWidth="0.4" opacity="0.35">
+            <animate attributeName="opacity" values="0.35;0.08;0.35" dur="3s" begin="-1s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="175" cy="180" r="110" fill="none" stroke="#5B8CFF" strokeWidth="0.4" opacity="0.25">
+            <animate attributeName="opacity" values="0.25;0.05;0.25" dur="3s" begin="-1.5s" repeatCount="indefinite" />
+          </circle>
+          {/* Blue center dot — pulse */}
+          <circle cx="175" cy="180" r="4.5" fill="#5B8CFF">
+            <animate attributeName="r" values="4.5;7.5;4.5" dur="2.5s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="1;0.5;1" dur="2.5s" repeatCount="indefinite" />
+          </circle>
+        </g>
+
+        {/* Purple orbital rings */}
+        <g>
+          <circle cx="305" cy="180" r="28" fill="none" stroke="#B99CDF" strokeWidth="0.8" opacity="0.55">
+            <animate attributeName="opacity" values="0.55;0.15;0.55" dur="3.5s" begin="-1s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="305" cy="180" r="52" fill="none" stroke="#B99CDF" strokeWidth="0.4" opacity="0.45">
+            <animate attributeName="opacity" values="0.45;0.12;0.45" dur="3.5s" begin="-1.5s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="305" cy="180" r="80" fill="none" stroke="#B99CDF" strokeWidth="0.4" opacity="0.35">
+            <animate attributeName="opacity" values="0.35;0.08;0.35" dur="3.5s" begin="-2s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="305" cy="180" r="110" fill="none" stroke="#B99CDF" strokeWidth="0.4" opacity="0.25">
+            <animate attributeName="opacity" values="0.25;0.05;0.25" dur="3.5s" begin="-2.5s" repeatCount="indefinite" />
+          </circle>
+          {/* Purple center dot — pulse, offset phase */}
+          <circle cx="305" cy="180" r="4.5" fill="#B99CDF">
+            <animate attributeName="r" values="4.5;7.5;4.5" dur="2.5s" begin="-0.8s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="1;0.5;1" dur="2.5s" begin="-0.8s" repeatCount="indefinite" />
+          </circle>
+        </g>
+
+        {/* Connecting dashed line — flowing */}
+        <line x1="175" y1="180" x2="305" y2="180"
+          stroke="#D4B896" strokeWidth="0.6" strokeDasharray="1 2">
+          <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="stroke-dashoffset" values="0;-9" dur="1.1s" repeatCount="indefinite" />
+        </line>
+
+        {/* Central meeting point — expand + contract */}
+        <g transform="translate(240, 180)">
+          <circle r="18" fill="#D4B896" opacity="0.08">
+            <animate attributeName="r" values="18;28;18" dur="3s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.08;0.2;0.08" dur="3s" repeatCount="indefinite" />
+          </circle>
+          <circle r="9" fill="#D4B896" opacity="0.16">
+            <animate attributeName="r" values="9;14;9" dur="3s" begin="-0.2s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.16;0.32;0.16" dur="3s" begin="-0.2s" repeatCount="indefinite" />
+          </circle>
+          <circle r="2.6" fill="#F2EBDA">
+            <animate attributeName="r" values="2.6;4.2;2.6" dur="2s" repeatCount="indefinite" />
+          </circle>
+          <g stroke="#D4B896" strokeWidth="0.4" opacity="0.5">
+            <line x1="-12" y1="0" x2="12" y2="0" />
+            <line x1="0" y1="-12" x2="0" y2="12" />
+          </g>
+        </g>
+
+        {/* Outer ellipse — slow rotation */}
+        <ellipse cx="240" cy="180" rx="155" ry="92"
+          fill="none" stroke="#D4B896" strokeWidth="0.4" opacity="0.22" strokeDasharray="2 5"
+          style={{ transformOrigin: '240px 180px', animation: 'nk-ellipse-spin 22s linear infinite' }} />
+      </svg>
+
+      {/* Names */}
+      <p style={{
+        fontFamily: 'var(--font-sans)', fontSize: '16px', fontWeight: 300,
+        color: 'var(--nk-text)', letterSpacing: '0.03em', textAlign: 'center',
+      }}>
+        {name1} <span style={{ color: 'var(--nk-text-4)', margin: '0 6px' }}>×</span> {name2}
+      </p>
+
+      {/* Cycling loading phrase */}
+      <p style={{
+        fontFamily: 'var(--font-sans)', fontSize: '12px', letterSpacing: '0.08em',
+        color: 'var(--nk-text-3)', textAlign: 'center',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.35s ease',
+        minHeight: '18px',
+      }}>
+        {phrases[phraseIdx]}
+      </p>
+    </div>
+  )
+}
+
 function ScoreRing({ score }: { score: number }) {
   const r = 38
   const cx = 52
@@ -539,10 +715,24 @@ export default function BondsPage() {
 
         <div style={{ flex: 1, padding: '28px 20px', maxWidth: '600px', width: '100%', margin: '0 auto', paddingBottom: '40px' }}>
 
-          {bond ? (
+          {generating ? (
+            <BondLoader
+              name1={user.username}
+              name2={selected ? `@${selected.username}` : '…'}
+            />
+          ) : bond ? (
             <BondReportView bond={bond} onReset={handleReset} />
           ) : (
             <>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                <img
+                  src="/illustrations/04-love-relationships.svg"
+                  alt=""
+                  aria-hidden="true"
+                  style={{ width: '100%', maxWidth: '300px', height: 'auto', opacity: 0.85 }}
+                />
+              </div>
+
               <p style={{
                 fontFamily: 'var(--font-sans)', fontSize: '22px', fontWeight: 300,
                 color: 'var(--nk-text)', marginBottom: '6px', lineHeight: 1.3,
@@ -661,7 +851,7 @@ export default function BondsPage() {
                   boxShadow: selected && !generating ? 'var(--nk-primary-glow)' : 'none',
                 }}
               >
-                {generating ? 'Reading the stars…' : 'Generate compatibility'}
+                Generate compatibility
               </button>
 
               {/* Past readings */}

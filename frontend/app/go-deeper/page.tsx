@@ -199,18 +199,32 @@ export default function GoDeeperPage() {
                       Naksha
                     </p>
                   )}
-                  <p style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: msg.role === 'assistant' ? '15px' : '14px',
-                    color: msg.role === 'user' ? 'var(--nk-text-2)' : 'var(--nk-text)',
-                    lineHeight: msg.role === 'assistant' ? 1.85 : 1.6,
-                    whiteSpace: 'pre-wrap',
-                  }}>
-                    {msg.content}
-                    {msg.role === 'assistant' && msg.content === '' && (
-                      <span style={{ opacity: 0.4 }}>●</span>
-                    )}
-                  </p>
+                  {msg.role === 'assistant' && msg.content === '' ? (
+                    <span style={{ display: 'flex', gap: '5px', alignItems: 'center', height: '22px' }}>
+                      <style>{`
+                        @keyframes nk-dot-bounce {
+                          0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+                          40% { opacity: 1; transform: translateY(-4px); }
+                        }
+                        .nk-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--nk-text-3); animation: nk-dot-bounce 1.2s infinite ease-in-out; }
+                        .nk-dot:nth-child(2) { animation-delay: 0.2s; }
+                        .nk-dot:nth-child(3) { animation-delay: 0.4s; }
+                      `}</style>
+                      <span className="nk-dot" />
+                      <span className="nk-dot" />
+                      <span className="nk-dot" />
+                    </span>
+                  ) : (
+                    <p style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: msg.role === 'assistant' ? '15px' : '14px',
+                      color: msg.role === 'user' ? 'var(--nk-text-2)' : 'var(--nk-text)',
+                      lineHeight: msg.role === 'assistant' ? 1.85 : 1.6,
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {msg.content}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

@@ -334,7 +334,7 @@ Chart data:
 - Current mahadasha: {maha_planet}
 
 Return ONLY a JSON object with:
-- "dharma": 3-4 sentences (~90 words) on soul's purpose. What is this person here to contribute, offer, or embody? How do Jupiter and Rahu define the life direction? Explain in accessible terms what dharma means before using the word.
+- "dharma": 3-4 sentences (~90 words) on soul's purpose. Speak directly to THIS person's specific placements — what they are here to contribute, offer, or embody. How do their Jupiter and Rahu define their life direction? Open immediately with a specific insight about their chart, not a definition of dharma. Never begin with "Your soul's purpose" or any explanation of what dharma means.
 - "what_to_create": 3-4 sentences (~90 words) on what they are here to build or create in this world. The tangible work, mission, or legacy this chart points toward. Keep it practical and specific to the placements.
 - "growth_blocks": 3-4 sentences (~90 words) on what tends to block growth. The patterns, fears, or resistances Saturn and any difficult placements reveal. Be honest and compassionate, not harsh. Frame as "what to face" not "what is wrong".
 

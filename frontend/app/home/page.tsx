@@ -523,8 +523,8 @@ export default function HomePage() {
             Explore
           </p>
           {[
-            { href: '/go-deeper', icon: '✦', title: 'Go Deeper', desc: 'Ask any question about your chart — your personal astrologer, always available.' },
-            { href: '/bonds',     icon: '◯', title: 'Bonds',     desc: 'Explore compatibility with friends or partners — a deep karmic reading for any relationship.' },
+            { href: '/go-deeper', icon: '✦', title: 'Go Deeper', desc: 'Ask about your chart, current life season or anything on your mind.' },
+            { href: '/bonds',     icon: '◯', title: 'Bonds',     desc: 'Explore compatibility with friends or partners.' },
           ].map(card => (
             <div
               key={card.href}

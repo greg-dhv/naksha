@@ -56,9 +56,9 @@ export default function OnboardingPage() {
       const t = setTimeout(() => {
         setLoadingPhase(p => (p + 1) % LOADING_PHASES.length)
         setPhaseVisible(true)
-      }, 350)
+      }, 600)
       return () => clearTimeout(t)
-    }, 1600)
+    }, 3500)
     return () => clearInterval(cycle)
   }, [loading])
 
@@ -131,11 +131,17 @@ export default function OnboardingPage() {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
-        @keyframes nk-phase-in {
-          from { opacity: 0; transform: translateY(7px); }
-          to   { opacity: 1; transform: translateY(0); }
+        .nk-phase-text {
+          transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.16,1,0.3,1);
         }
-        .nk-phase-enter { animation: nk-phase-in 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+        .nk-phase-text.hidden {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        .nk-phase-text.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
       `}</style>
       <main style={{
         minHeight: '100vh',
@@ -218,7 +224,7 @@ export default function OnboardingPage() {
         </svg>
 
         {/* Phase text */}
-        <div style={{ marginTop: '52px', textAlign: 'center', minHeight: '70px' }}>
+        <div style={{ marginTop: '52px', textAlign: 'center' }}>
           <p style={{
             fontFamily: 'var(--font-sans)', fontSize: '10px',
             letterSpacing: '0.28em', textTransform: 'uppercase',
@@ -227,25 +233,23 @@ export default function OnboardingPage() {
           }}>
             Mapping your Naksha
           </p>
-          {phaseVisible && (
-            <div className="nk-phase-enter">
-              <p style={{
-                fontFamily: 'var(--font-sans)', fontSize: '10px',
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                color: 'rgba(212,184,150,0.55)',
-                marginBottom: '8px',
-              }}>
-                {LOADING_PHASES[loadingPhase].label}
-              </p>
-              <p style={{
-                fontFamily: 'var(--font-sans)', fontSize: '16px',
-                fontWeight: 300, letterSpacing: '0.01em',
-                color: 'rgba(245,247,251,0.42)',
-              }}>
-                {LOADING_PHASES[loadingPhase].text}
-              </p>
-            </div>
-          )}
+          <div className={`nk-phase-text ${phaseVisible ? 'visible' : 'hidden'}`}>
+            <p style={{
+              fontFamily: 'var(--font-sans)', fontSize: '10px',
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              color: 'rgba(212,184,150,0.55)',
+              marginBottom: '8px',
+            }}>
+              {LOADING_PHASES[loadingPhase].label}
+            </p>
+            <p style={{
+              fontFamily: 'var(--font-sans)', fontSize: '16px',
+              fontWeight: 300, letterSpacing: '0.01em',
+              color: 'rgba(245,247,251,0.42)',
+            }}>
+              {LOADING_PHASES[loadingPhase].text}
+            </p>
+          </div>
         </div>
       </main>
     </>

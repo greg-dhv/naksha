@@ -64,15 +64,16 @@ export default function AuthModal() {
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 200,
-        background: 'rgba(7,12,22,0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: 'rgba(7,12,22,0.40)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '24px',
       }}
       onClick={e => { if (e.target === e.currentTarget) closeAuthModal() }}
     >
       <div style={{
+        position: 'relative',
         background: 'var(--nk-surface)',
         border: '1px solid var(--nk-border)',
         borderRadius: 'var(--nk-r-lg)',
@@ -81,6 +82,35 @@ export default function AuthModal() {
         maxWidth: '400px',
         boxShadow: 'var(--nk-shadow-lg)',
       }}>
+
+        {/* Close button */}
+        <button
+          onClick={closeAuthModal}
+          aria-label="Close"
+          style={{
+            position: 'absolute', top: '14px', right: '14px',
+            width: '30px', height: '30px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'transparent',
+            border: '1px solid var(--nk-border)',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            color: 'var(--nk-text-3)',
+            fontSize: '16px',
+            lineHeight: 1,
+            transition: 'border-color 150ms ease, color 150ms ease',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--nk-text-2)'
+            ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--nk-text)'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--nk-border)'
+            ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--nk-text-3)'
+          }}
+        >
+          ×
+        </button>
 
         {/* Eyebrow */}
         <p style={{
