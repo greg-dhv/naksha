@@ -73,6 +73,13 @@ Strict rules:
     )
     text = response.content[0].text.strip()
 
+    # Strip markdown code fences if Claude wrapped the JSON
+    if text.startswith("```"):
+        lines = text.split("\n")
+        text = "\n".join(lines[1:])  # drop the opening ```json line
+    if text.endswith("```"):
+        text = text[:text.rfind("```")].strip()
+
     try:
         parsed = json.loads(text)
         if isinstance(parsed, dict):

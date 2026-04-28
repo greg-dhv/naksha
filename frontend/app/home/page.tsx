@@ -153,9 +153,10 @@ export default function HomePage() {
   const [briefingExpanded, setBriefingExpanded] = useState(false)
 
   useEffect(() => {
+    if (loading) return
     const stored = localStorage.getItem('naksha_chart')
-    if (!stored) { router.replace('/'); return }
-  }, [token])
+    if (!stored && !user) { router.replace('/'); return }
+  }, [loading, user, token])
 
   useEffect(() => {
     if (!token) return
@@ -432,7 +433,7 @@ export default function HomePage() {
             Your season
           </p>
 
-          {cycles ? (
+          {cycles && (cycles.mahadasha || cycles.antardasha || cycles.pratyantardasha) ? (
             <div style={{
               background: 'var(--nk-surface)', border: '1px solid var(--nk-border)',
               borderRadius: 'var(--nk-r-lg)', padding: '24px 20px',

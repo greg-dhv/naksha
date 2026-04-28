@@ -185,33 +185,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </button>
           )
         })}
-        {/* Account / Sign-in */}
-        <button
-          onClick={() => user ? setShowAccount(true) : openAuthModal()}
-          style={{
-            flex: 1, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            gap: '3px', border: 'none', background: 'none',
-            cursor: 'pointer', padding: '8px 0',
-          }}
-        >
-          <div style={{
-            width: '20px', height: '20px', borderRadius: '50%',
-            background: user ? 'var(--nk-primary-dim)' : 'rgba(255,255,255,0.06)',
-            border: `1px solid ${user ? 'var(--nk-primary-line)' : 'var(--nk-border)'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '9px', color: user ? 'var(--nk-primary)' : 'var(--nk-text-3)',
-          }}>
-            {user ? user.username[0].toUpperCase() : '?'}
-          </div>
-          <span style={{
-            fontFamily: 'var(--font-sans)', fontSize: '9px',
-            letterSpacing: '0.08em', textTransform: 'uppercase',
-            color: 'var(--nk-text-3)',
-          }}>
-            {user ? 'Account' : 'Sign in'}
-          </span>
-        </button>
       </nav>
 
       {/* ── Page content ── */}

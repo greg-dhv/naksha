@@ -10,7 +10,8 @@ interface AuthContextValue {
   setAuth: (token: string, user: AuthUser) => void
   logout: () => void
   showAuthModal: boolean
-  openAuthModal: () => void
+  authModalTab: 'login' | 'register'
+  openAuthModal: (tab?: 'login' | 'register') => void
   closeAuthModal: () => void
 }
 
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('register')
 
   useEffect(() => {
     const stored = localStorage.getItem('naksha_token')
@@ -55,7 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user, token, loading,
       setAuth, logout,
       showAuthModal,
-      openAuthModal: () => setShowAuthModal(true),
+      authModalTab,
+      openAuthModal: (tab: 'login' | 'register' = 'register') => { setAuthModalTab(tab); setShowAuthModal(true) },
       closeAuthModal: () => setShowAuthModal(false),
     }}>
       {children}

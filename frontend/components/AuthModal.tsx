@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { login, register, saveChart } from '@/lib/api'
 
-export default function AuthModal() {
+export default function AuthModal({ initialTab = 'register' }: { initialTab?: 'login' | 'register' }) {
   const { closeAuthModal, setAuth } = useAuth()
-  const [tab, setTab] = useState<'login' | 'register'>('register')
+  const [tab, setTab] = useState<'login' | 'register'>(initialTab)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
@@ -22,8 +22,8 @@ export default function AuthModal() {
         ? await register(email, password, username)
         : await login(email, password)
 
-      setAuth(result.token, result.user)
-
+      // For new registrations: save chart to server BEFORE closing modal
+      // so that /api/home has chart data ready on first load
       if (tab === 'register') {
         const stored = localStorage.getItem('naksha_chart')
         if (stored) {
@@ -35,10 +35,12 @@ export default function AuthModal() {
               birth_time: chart.meta?.birth_time,
               location_name: chart.meta?.location_name,
             }
-            saveChart(result.token, chart, birthData).catch(() => {})
+            await saveChart(result.token, chart, birthData)
           } catch {}
         }
       }
+
+      setAuth(result.token, result.user)
     } catch (err: any) {
       setError(err.message)
     } finally {

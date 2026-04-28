@@ -7,6 +7,7 @@ import { PLANET_SYMBOLS, PLANET_COLORS, SIGN_SYMBOLS } from '@/lib/api'
 import { getNakshatraSrc, getYogaMeta } from '@/lib/illustrations'
 import { useAuth } from '@/contexts/AuthContext'
 import AppShell from '@/components/AppShell'
+import AccountModal from '@/components/AccountModal'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -93,12 +94,13 @@ function MyChartView({ data, expandedPlanet, onExpandPlanet, onGoDeeper, onBonds
   onBonds: () => void
 }) {
   const [subTab, setSubTab] = useState<ChartSubTab>('reading')
+  const [showAccount, setShowAccount] = useState(false)
   const { user, openAuthModal } = useAuth()
 
   return (
     <div>
       {/* Pill segmented control */}
-      <div style={{ padding: '20px 20px 0', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ padding: '20px 20px 0', display: 'flex', justifyContent: 'center', position: 'relative' }}>
         <div style={{
           display: 'inline-flex',
           background: 'var(--nk-surface)',
@@ -127,12 +129,33 @@ function MyChartView({ data, expandedPlanet, onExpandPlanet, onGoDeeper, onBonds
             </button>
           ))}
         </div>
+
+        {/* Settings / Account icon — upper right, mobile only */}
+        <button
+          onClick={() => user ? setShowAccount(true) : openAuthModal('login')}
+          aria-label="Account settings"
+          className="mobile-only"
+          style={{
+            position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)',
+            width: '32px', height: '32px', borderRadius: '50%',
+            alignItems: 'center', justifyContent: 'center',
+            background: user ? 'var(--nk-primary-dim)' : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${user ? 'var(--nk-primary-line)' : 'var(--nk-border)'}`,
+            cursor: 'pointer',
+            fontSize: user ? '11px' : '13px',
+            color: user ? 'var(--nk-primary)' : 'var(--nk-text-3)',
+          }}
+        >
+          {user ? user.username[0].toUpperCase() : '⚙'}
+        </button>
       </div>
 
       <div style={{ maxWidth: '600px', width: '100%', margin: '0 auto' }}>
         {subTab === 'reading' && <ReadingView data={data} onGoDeeper={onGoDeeper} onBonds={onBonds} />}
         {subTab === 'chart'   && <div style={{ padding: '28px 20px 80px' }}><ChartDetailView data={data} expandedPlanet={expandedPlanet} onExpandPlanet={onExpandPlanet} user={user} onSave={openAuthModal} /></div>}
       </div>
+
+      {showAccount && user && <AccountModal onClose={() => setShowAccount(false)} />}
     </div>
   )
 }
