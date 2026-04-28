@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { geocodeLocation, generateChart } from '@/lib/api'
 import { GeocodeResult } from '@/lib/types'
 
@@ -309,8 +310,8 @@ export default function OnboardingPage() {
         </button>
       )}
 
-      {/* Logo */}
-      <div style={{ position: 'absolute', top: '36px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {/* Logo — links back to landing */}
+      <Link href="/" style={{ position: 'absolute', top: '36px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
         <div style={{
           width: '20px', height: '20px', borderRadius: '50%',
           background: 'var(--nk-primary-dim)', border: '1px solid var(--nk-primary-line)',
@@ -320,7 +321,7 @@ export default function OnboardingPage() {
         <span style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 600, color: 'var(--nk-text-3)' }}>
           Naksha
         </span>
-      </div>
+      </Link>
 
       {/* Progress */}
       <div style={{ position: 'absolute', top: '44px', right: '40px', display: 'flex', gap: '6px' }}>

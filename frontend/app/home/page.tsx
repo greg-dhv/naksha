@@ -154,7 +154,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const stored = localStorage.getItem('naksha_chart')
-    if (!stored) { router.replace('/onboarding'); return }
+    if (!stored) { router.replace('/'); return }
   }, [token])
 
   useEffect(() => {

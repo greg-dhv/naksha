@@ -47,9 +47,9 @@ export default function ChartPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem('naksha_chart')
-    if (!stored) { router.replace('/onboarding'); return }
+    if (!stored) { router.replace('/'); return }
     try { setData(JSON.parse(stored)); setTimeout(() => setVisible(true), 100) }
-    catch { router.replace('/onboarding') }
+    catch { router.replace('/') }
   }, [router])
 
   if (!data) return (
