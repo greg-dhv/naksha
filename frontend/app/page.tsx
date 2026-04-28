@@ -231,7 +231,7 @@ export default function LandingPage() {
 
           <div className="lp-nav-actions">
             {!loading && !user && (
-              <button className="lp-nav-signin" onClick={openAuthModal}>
+              <button className="lp-nav-signin" onClick={() => openAuthModal()}>
                 Sign in
               </button>
             )}

@@ -219,7 +219,7 @@ export default function HomePage() {
                 Your weekly reading is generated every Monday, personalised to your chart and current life season.
               </p>
               <button
-                onClick={openAuthModal}
+                onClick={() => openAuthModal()}
                 style={{ position: 'relative', zIndex: 1, padding: '10px 22px', background: 'var(--nk-primary-dim)', border: '1px solid var(--nk-primary-line)', borderRadius: 'var(--nk-r-sm)', color: 'var(--nk-primary)', fontFamily: 'var(--font-sans)', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', cursor: 'pointer' }}
               >
                 Sign in to unlock →
